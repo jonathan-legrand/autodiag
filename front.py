@@ -75,5 +75,5 @@ with col_diag :
     diagnosis_proba = diagnosis_proba.sort_values(by = 'symptome', ascending=False)
     diagnosis_proba = diagnosis_proba[diagnosis_proba.index < 5]
     # diagnosis_proba = diagnosis_proba.drop(labels =['index'])
-    st.bar_chart(diagnosis_proba, horizontal = True, x = 'disorder', y = 'symptome', height = 500)
+    st.bar_chart(diagnosis_proba, horizontal = True, x = 'disorder', y = 'symptome', height = 500, sort = False)
     
