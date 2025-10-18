@@ -1,7 +1,7 @@
 from query_embedding import get_embedding
 import pandas as pd
 import numpy as np
-import picle
+import pickle
 
 with open('../data/symptomes_embedding.pkl', 'rb') as fp:
         symptoms_embeds = pickle.load(fp)
