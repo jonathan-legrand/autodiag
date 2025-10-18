@@ -15,7 +15,10 @@ llm_patients = pd.read_csv(data_path, sep="|")
 def get_random_patient():
     random_idx = np.random.randint(0, len(llm_patients))
     patient_data = llm_patients.iloc[random_idx]
-    return {key: patient_data[key] for key in llm_patients.columns}
+    labels = patient_data["Medical Conditions"].split(", ")
+    patient_data = patient_data.drop(labels=["Medical Conditions"])
+    demographics = {key: patient_data[key] for key in llm_patients.columns}
+    return labels, demographics
 
 
 
