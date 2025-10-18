@@ -16,6 +16,7 @@ class Investigator:
         self.n_switch_cycles = n_switch_cycles
         self.iteration_counter = 0
         self.explore = True
+        self.current_question = None
 
         # make data_path pathlib-friendly and resolve relative to this file
         data_path = Path(data_path)
@@ -32,6 +33,7 @@ class Investigator:
 
         self.conversation_history = []
         self.conversation_summary = []
+
 
     # TODO
     def update_patient_representation(self):
@@ -83,3 +85,4 @@ class Investigator:
 #print(investigator.generate_instruction())
 ## %%
 #investigator.compute_score_distribution()
+#
