@@ -48,9 +48,9 @@ class DialogueManager:
         self.question = call_api(instruction, role="clinician")
         self.investigator.update_conversation_history(self.question, role="clinician")
         
-        # Save state
-        with open(FRONT_EXPORT_PATH, "wb") as stream:
-            pickle.dump(self.investigator, stream)
+        # # Save state
+        # with open(FRONT_EXPORT_PATH, "wb") as stream:
+        #     pickle.dump(self.investigator, stream)
             
         return {
             "response": response,
