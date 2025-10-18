@@ -52,36 +52,26 @@ class Investigator:
             self.explore = False
 
     def generate_instruction(self):
-        # determine top disease and relevant symptoms (safe handling)
-        if self.long_scores["score"].abs().sum() == 0:
-            most_important_disease = None
-            relevant_symptoms = ""
-        else:
-            most_important_disease = (
-                self.long_scores.sort_values(by="score", ascending=False)
-                .reset_index(drop=True)
-                .loc[0, "disorder"]
-            )
-            # select symptom column safely, drop NA, convert to strings
-            sympt_series = (
-                self.long_data.loc[self.long_data.index[self.long_scores.code == most_important_disease], "symptome"]
-                if "disorder" in self.long_scores.columns
-                else self.long_data["symptome"]
-            )
-            sympt_list = [str(s).strip() for s in pd.Series(sympt_series).dropna().tolist() if str(s).strip()]
-            relevant_symptoms = ". ".join(sympt_list)
+        most_important_disease = self.long_scores.sort_values(
+            by="score", ascending=False
+        ).reset_index(drop=True).loc[0, "disorder"]
+        most_important_symptoms = self.long_data[self.long_scores.disorder == most_important_disease].symptome
+
+        relevant_symptoms = reduce(
+            concat_sentences, most_important_symptoms
+        )
 
         # choose prompt text based on mode (do not return early)
         if self.explore:
             prompt_text = (
                 "Continue the conversation with the patient to explore their symptoms. "
-                f"Focus on gathering information about the following symptoms: {relevant_symptoms}. "
+                f"Focus on gathering information about the patient's symptoms. "
                 "Ask concise and relevant questions to better understand the patient's condition."
             )
         else:
             prompt_text = (
                 f"Based on the patient's responses, it appears that the most relevant diagnosis is "
-                f"{most_important_disease}. To confirm this diagnosis, ask targeted questions about the "
+                f"{most_important_disease}. To confirm this diagnosis, ask questions which are informative about the "
                 f"following symptoms: {relevant_symptoms}. Your goal is to gather specific information that "
                 "will help validate or refute this diagnosis."
             )
@@ -104,7 +94,7 @@ class Investigator:
         return [system_msg] + history_msgs + [instruction_msg]
 
     def compute_score_distribution(self):
-        sum_scores = self.long_scores.groupby("disorder").sum(numeric_only=True)
+        sum_scores = self.long_scores.groupby("disorder").sum(numeric_only=True).reset_index()
         sum_scores.sort_values(by="score", ascending=False, inplace=True)
         
         return sum_scores / self.iteration_counter
