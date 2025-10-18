@@ -12,7 +12,7 @@ client = OpenAI(
     base_url="http://127.0.0.1:1234/v1",
     api_key="lm-studio"
 )
-def get_embedding(text:str, model="model-identifier"):
+def get_embedding(text:str, model=MODEL):
    text = text.replace("\n", " ")
    
    embedding = client.embeddings.create(input=[text], model=model).data[0].embedding
