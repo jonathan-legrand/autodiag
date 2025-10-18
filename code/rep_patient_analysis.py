@@ -7,7 +7,7 @@ with open('../data/symptomes_embedding.pkl', 'rb') as fp:
         symptoms_embeds = pickle.load(fp)
 
 
-def distance_rep_patient(rep_patient:str, symptomes_embedding) : 
+def distance_rep_patient(rep_patient:str) : 
     
     rep_embedding  = get_embedding(rep_patient)
 
