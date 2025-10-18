@@ -9,6 +9,16 @@ from functools import reduce
 def concat_sentences(x, y):
     return x + ". " + y
 
+def most_important(object) : 
+    # TO DO need to check that most important disease was not already investigated as false 
+
+    most_important_disease = object.long_scores.sort_values(
+            by="score", ascending=False
+        ).reset_index(drop=True).loc[0, "disorder"]
+    most_important_symptoms = object.long_data[object.long_scores.disorder == most_important_disease].symptome
+
+    return most_important_disease, most_important_symptoms
+
 
 class Investigator:
     def __init__(self, n_switch_cycles=5, data_path="../data/datalong.csv"):
@@ -17,6 +27,7 @@ class Investigator:
         self.iteration_counter = 0
         self.explore = True
         self.current_question = None
+        self.min_symptoms = 3
         self.patient_metadata = {
 
         }
@@ -25,11 +36,11 @@ class Investigator:
         # init random patient from llm_patients db
         from patients.patient import get_random_patient
         patient = get_random_patient()
-        self.patient_metadata = patient.drop(labels=["Medical Conditions"])
+        # self.patient_metadata = patient.drop(labels=["Medical Conditions"]) 
 
-        self.actual_diagnoses = patient["Medical Conditions"].split(", ")
-        print(self.patient_metadata)
-        print("Actual diagnoses:", self.actual_diagnoses)
+        # self.actual_diagnoses = patient["Medical Conditions"].split(", ")
+        # print(self.patient_metadata)
+        # print("Actual diagnoses:", self.actual_diagnoses)
         # make data_path pathlib-friendly and resolve relative to this file
         data_path = Path(data_path)
         if not data_path.is_absolute():
@@ -64,11 +75,8 @@ class Investigator:
             self.explore = False
 
     def generate_instruction(self):
-        most_important_disease = self.long_scores.sort_values(
-            by="score", ascending=False
-        ).reset_index(drop=True).loc[0, "disorder"]
-        most_important_symptoms = self.long_data[self.long_scores.disorder == most_important_disease].symptome
-
+        most_important_disease, most_important_symptoms = most_important(self)
+        
         relevant_symptoms = reduce(
             concat_sentences, most_important_symptoms
         )
@@ -111,6 +119,12 @@ class Investigator:
         sum_scores["score"] = sum_scores["score"] / self.iteration_counter
         
         return sum_scores
+    
+    def diagnose(self) : 
+        return most_important(self)
+        
+        
+
 
 # %%
 #investigator = Investigator()
