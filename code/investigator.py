@@ -96,8 +96,9 @@ class Investigator:
     def compute_score_distribution(self):
         sum_scores = self.long_scores.groupby("disorder").sum(numeric_only=True).reset_index()
         sum_scores.sort_values(by="score", ascending=False, inplace=True)
+        sum_scores["score"] = sum_scores["score"] / self.iteration_counter
         
-        return sum_scores / self.iteration_counter
+        return sum_scores
 
 # %%
 #investigator = Investigator()
