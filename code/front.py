@@ -10,9 +10,50 @@ import pickle
 from investigator import Investigator
 import plotly.express as px
 
-
 # root_folder = Path('C:/Users/achil/Documents/autodiag/')
 root_folder = Path('C:/Users/Sophie/Documents/Hack1robo/autodiag/')
+# Simuler une "base de données" utilisateur
+USERS = {
+    "sophie": "monmotdepasse",
+    "admin": "admin123"
+}
+
+def login():
+    st.image(f'{root_folder}/data/Icone_Patient.png')
+
+    username = st.text_input("email")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Se connecter"):
+        if username in USERS and USERS[username] == password:
+            st.success(f"Bienvenue {username} !")
+            st.session_state["logged_in"] = True
+            st.session_state["username"] = username
+        else:
+            st.error("Nom d'utilisateur ou mot de passe incorrect.")
+
+def main_app():
+    st.title("Page principale")
+    st.write(f"Bienvenue sur l'application, {st.session_state['username']} !")
+
+    if st.button("Se déconnecter"):
+        st.session_state["logged_in"] = False
+        st.session_state["username"] = ""
+
+def main():
+    if "logged_in" not in st.session_state:
+        st.session_state["logged_in"] = False
+        st.session_state["username"] = ""
+
+    if st.session_state["logged_in"]:
+        main_app()
+    else:
+        login()
+
+if __name__ == "__main__":
+    main()
+
+
 
 def turn_true(go) : 
     go = True
@@ -45,7 +86,10 @@ st.markdown(
 with open(root_folder / 'data' / 'investigator.pkl', 'rb') as fp:
     investigator  = pickle.load(fp)
 
-investigator.explore = True
+investigator.explore = False
+diagnosis = False
+
+report = "test report"
 
 recap = investigator.conversation_summary
 
@@ -53,8 +97,42 @@ recap = investigator.conversation_summary
 patient_info = {'Name' : 'Roger', 'Age' : 55, 'Sex': 'Male', 'Clinical history' : ['Diabetic', 'Epileptic']}
 
 diagnosis_proba = investigator.compute_score_distribution()
+def plot_diagnosis_bar_chart(diagnosis_proba):
+        """
+        Affiche un bar chart horizontal des scores de diagnostic dans Streamlit,
+        avec des couleurs personnalisées.
+
+        Args:
+            diagnosis_proba (pd.DataFrame): DataFrame contenant les colonnes 'score' et 'disorder'.
+                                            Une colonne 'color' est générée automatiquement.
+        """
+
+        # Liste de couleurs personnalisées (autant que de lignes dans le DataFrame)
+        custom_colors = ["#F8C8DC", "#A8DADC", "#CFFFE5", "#FFF3B0", "#DCC6E0"]
+
+        # Ajouter une colonne 'color' (optionnel, uniquement si tu veux la conserver)
+        # diagnosis_proba = diagnosis_proba.copy()
+        # diagnosis_proba['color'] = custom_colors[:len(diagnosis_proba)]
+
+        # Créer le bar chart
+        fig = px.bar(
+            diagnosis_proba,
+            x='score',
+            y='disorder',
+            orientation='h',
+            color='disorder',
+            color_discrete_sequence=custom_colors,
+            height=500
+        )
+        # Retirer la légende
+        fig.update_layout(showlegend=False)
+
+        # Afficher le graphique dans Streamlit
+        st.plotly_chart(fig)
 
 st.write(investigator.explore)
+st.write(diagnosis)
+
 if investigator.explore : 
 
     col_info, col_diag = st.columns(2)
@@ -65,7 +143,7 @@ if investigator.explore :
             col_img, col_info_text = st.columns([1, 3])  # Ratio 1:3
 
             with col_img:
-                st.image("https://via.placeholder.com/100", width=100)  # Image par défaut
+                st.image(f'{root_folder}/data/Icone_Patient.png')
 
             with col_info_text:
                 lines = []
@@ -113,28 +191,11 @@ if investigator.explore :
         diagnosis_proba = diagnosis_proba.sort_values(by = 'score', ascending=False)
         diagnosis_proba = diagnosis_proba[:5]
         # st.write(diagnosis_proba.columns)
-        # Ajout d'une colonne pour les couleurs personnalisées
-        colors = ["#F8C8DC", "#A8DADC", "#CFFFE5", "#FFF3B0", "#DCC6E0"]
-        diagnosis_proba['color'] = colors
-
-        # Création du bar chart avec barres horizontales
-        fig = px.bar(
-            diagnosis_proba,
-            x='disorder',
-            y='score',
-            orientation='h',
-            color='score',
-            color_discrete_sequence=colors,
-            height=500
-        )
-
-        # Suppression de la légende si tu ne veux pas de doublon
-        fig.update_layout(showlegend=False)
-
-        # Affichage dans Streamlit
-        st.plotly_chart(fig)
+        
+    
         # st.bar_chart(diagnosis_proba, horizontal = True, x = 'disorder', y = 'score', height = 500, sort = False)
-else : 
+        plot_diagnosis_bar_chart(diagnosis_proba)
+elif diagnosis: 
     col_info, col_diag = st.columns(2)
 
     with col_info : 
@@ -143,7 +204,8 @@ else :
             col_img, col_info_text = st.columns([1, 3])  # Ratio 1:3
 
             with col_img:
-                st.image("https://via.placeholder.com/100", width=100)  # Image par défaut
+                st.image(f'{root_folder}/data/Icone_Patient.png')
+    
 
             with col_info_text:
                 lines = []
@@ -176,7 +238,63 @@ else :
         submitted = st.form_submit_button("Submit")
         if submitted:
             st.write( "checkbox", checkbox_val, "checkbox1", checkbox_val1)
-st.write("Outside the form")
+
+else : 
+    col_info, col_diag = st.columns(2)
+
+    with col_info : 
+        with st.container(border = False, width = 500, height = 100) :
+        # Deux colonnes : image à gauche, infos à droite
+            col_img, col_info_text = st.columns([1, 3])  # Ratio 1:3
+
+            with col_img:
+                st.image(f'{root_folder}/data/Icone_Patient.png')
+
+            with col_info_text:
+                lines = []
+                for category, contenu in patient_info.items():
+                    if isinstance(contenu, list):
+                        contenu = ", ".join(contenu)
+                    lines.append(f"<strong>{category}</strong>: {contenu}")
+        
+            # Assemble les lignes avec des <br> HTML
+            joined_lines = "<br>".join(lines)
+
+            # Injecte du style CSS + contenu
+            st.markdown("""
+                <style>
+                    .big-font {
+                        font-size: 15px !important;
+                        line-height: 1.2;
+                    }
+                </style>
+            """, unsafe_allow_html=True)
+
+            # Affiche le texte avec la classe CSS
+            st.markdown(f'<p class="big-font">{joined_lines}</p>', unsafe_allow_html=True)
+
+    with st.container(border = False) :
+        st.markdown('<div style="text-align: center;font-size: 40px"><b>Report</b></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="text-align: center">{report}</div>', unsafe_allow_html=True)
+    # Créer deux boutons côte à côte avec columns
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Conteneur pour aligner le bouton à gauche
+        st.markdown('<div style="text-align: left;">', unsafe_allow_html=True)
+        if st.button("Download PDF"):
+            st.success("PDF téléchargé ! (placeholder)")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+
+    with col2:
+        # Conteneur pour aligner le bouton à droite
+        st.markdown('<div style="text-align: right;">', unsafe_allow_html=True)
+        if st.button("Close the session"):
+            st.warning("Session fermée ! (placeholder)")
+        st.markdown('</div>', unsafe_allow_html=True)
+  
+
 
 
 # Refresh every second
