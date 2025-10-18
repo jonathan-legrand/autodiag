@@ -79,3 +79,6 @@ with col_diag :
     # diagnosis_proba = diagnosis_proba.drop(labels =['index'])
     st.bar_chart(diagnosis_proba, horizontal = True, x = 'disorder', y = 'symptome', height = 500, sort = False)
     
+# Refresh every second
+time.sleep(1)
+st.rerun()
