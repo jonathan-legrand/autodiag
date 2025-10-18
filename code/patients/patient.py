@@ -17,7 +17,7 @@ def get_random_patient():
     patient_data = llm_patients.iloc[random_idx]
     labels = patient_data["Medical Conditions"].split(", ")
     patient_data = patient_data.drop(labels=["Medical Conditions"])
-    demographics = {key: patient_data[key] for key in llm_patients.columns}
+    demographics = {key: patient_data[key] for key in patient_data.columns}
     return labels, demographics
 
 
