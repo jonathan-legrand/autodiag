@@ -36,6 +36,7 @@ class Investigator:
         # init random patient from llm_patients db
         from patients.patient import get_random_patient
         labels, patient = get_random_patient()
+        self.patient_metadata = patient
         self.actual_diagnoses = labels
         # print(self.patient_metadata)
         print("Actual diagnoses:", self.actual_diagnoses)

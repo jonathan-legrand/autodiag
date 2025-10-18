@@ -7,17 +7,32 @@ from llm_query import call_api
 
 symptoms_func = distance_rep_patient
 
-def ask_patient(question, conv_history: list[dict]) -> dict:
+def ask_patient(question, conv_history, demographics: list[dict]) -> dict:
     disorder = "Dissociative Identity Disorder"
     code = "F44.81"
+    # system_msg = [
+    #     {
+    #         "role": "system",
+    #         "content": f"""
+    #         You are a patient being interviewed by a mental health medical investigator.
+    #         You must simulate the symptoms of {disorder}, as classified by ICD-10 code {code}.
+    #         Answer the investigator's questions in a way that reflects the experiences and challenges associated with {disorder}.
+    #         Do not acknowledge symptoms that are not related to your disorder.
+    #         """
+    #         }
+    #         ]
     system_msg = [
         {
             "role": "system",
             "content": f"""
             You are a patient being interviewed by a mental health medical investigator.
-            You must simulate the symptoms of {disorder}, as classified by ICD-10 code {code}.
-            Answer the investigator's questions in a way that reflects the experiences and challenges associated with {disorder}.
-            Do not acknowledge symptoms that are not related to your disorder.
+            Your traits are:
+            {demographics}
+            Answer the investigator's questions in a way that is congruent with these traits.
+            Do not acknowledge symptoms that may not related to your potential disorder.
+            Do not acknowledge any potential disorder diagnosis.
+            Do not reveal any information about your disorder unless directly asked about related symptoms.
+            Do not agree to every question, be realistic and nuanced in your answers.
             """
             }
             ]
@@ -38,7 +53,7 @@ class DialogueManager:
     
     def process_interaction(self):
         """Single turn of dialogue"""
-        response = ask_patient(self.question, self.investigator.conversation_history)
+        response = ask_patient(self.question, self.investigator.conversation_history, self.investigator.patient_metadata)
         self.investigator.update_conversation_history(response, role="patient")
         
         symptoms_score = symptoms_func(response)
