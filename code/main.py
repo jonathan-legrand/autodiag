@@ -23,6 +23,10 @@ def main():
 
         instruction =  investigator.generate_instruction()
 
+        print("Investigator instruction:", instruction)
+        
+
+
 
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@ import pickle
 from openai import OpenAI
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 MODEL = "text-embedding-embeddinggemma-300m-qat"
 client = OpenAI(
@@ -17,13 +18,19 @@ def get_embedding(text, model="model-identifier"):
    embedding = client.embeddings.create(input=[text], model=model).data[0].embedding
    return np.array(embedding)
 
-with open('../data/symptomes_embedding.pkl', 'rb') as fp:
+symptoms_embeddings_path = Path('../data/symptomes_embedding.pkl')
+
+if not symptoms_embeddings_path.is_absolute():
+            # resolve relative to the repository/code file location (works on Windows)
+            symptoms_embeddings_path = (Path(__file__).resolve().parent / symptoms_embeddings_path).resolve()
+
+with open(symptoms_embeddings_path, 'rb') as fp:
         symptoms_embeds = pickle.load(fp)
 
 
-def distance_rep_patient(rep_patient:str) : 
-    
+def distance_rep_patient(rep_patient:str, symptoms_embeds) : 
     rep_embedding  = get_embedding(rep_patient)
+    
 
     criteria_embedding = np.stack(symptoms_embeds['embedding'])
 
