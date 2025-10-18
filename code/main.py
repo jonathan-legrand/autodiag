@@ -30,35 +30,32 @@ def ask_patient(question, conv_history: list[dict]) -> dict:
 
 INITIAL_QUESTION = "What brings you today?"
 FRONT_EXPORT_PATH = "data/investigator.pkl"
-
-def main():
-    investigator = Investigator()
-    question = INITIAL_QUESTION
-    investigator.update_conversation_history(question, role="clinician")
-    while True:
-        breakpoint()
-        print("Asking patient")
-        response = ask_patient(question, investigator.conversation_history)
-        investigator.update_conversation_history(response, role="patient")
-        symptoms_score = symptoms_func(response)
-        print("Updating patient representation")
-        investigator.update_patient_representation(symptoms_score)
-        # TODO update clinical reprot
-        # investigator.update_clinical_report()
-
-        instruction =  investigator.generate_instruction()
-        question = call_api(instruction, role="clinician")
-        investigator.update_conversation_history(question, role="clinician")
-
-        print("Investigator instruction:", instruction)
-
-        with open(FRONT_EXPORT_PATH, "wb") as stream:
-            pickle.dump(investigator, stream)
-        print(f"Exported investigator to {FRONT_EXPORT_PATH}")
-
-
-
-if __name__ == '__main__':
-    main()
-
+class DialogueManager:
+    def __init__(self):
+        self.investigator = Investigator()
+        self.question = INITIAL_QUESTION
+        self.investigator.update_conversation_history(self.question, role="clinician")
     
+    def process_interaction(self):
+        """Single turn of dialogue"""
+        response = ask_patient(self.question, self.investigator.conversation_history)
+        self.investigator.update_conversation_history(response, role="patient")
+        
+        symptoms_score = symptoms_func(response)
+        self.investigator.update_patient_representation(symptoms_score)
+        
+        instruction = self.investigator.generate_instruction()
+        self.question = call_api(instruction, role="clinician")
+        self.investigator.update_conversation_history(self.question, role="clinician")
+        
+        # Save state
+        with open(FRONT_EXPORT_PATH, "wb") as stream:
+            pickle.dump(self.investigator, stream)
+            
+        return {
+            "response": response,
+            "next_question": self.question,
+            "diagnosis_proba": self.investigator.compute_score_distribution()
+        }
+
+# Remove the main() function as it will be controlled by Streamlit
