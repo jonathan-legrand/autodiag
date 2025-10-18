@@ -69,17 +69,17 @@ class Investigator:
         return sum_scores / self.iteration_counter
 
 # %%
-investigator = Investigator()
-
-fake_update = investigator.long_scores.copy()
-rng = np.random.default_rng()
-fake_update["score"] = rng.normal(size=(len(fake_update)))
-
-print(investigator.long_scores[["code", "score"]].head())
-investigator.update_patient_representation(fake_update)
-print(investigator.long_scores[["code", "score"]].head())
-# %%
-investigator.explore = False
-print(investigator.generate_instruction())
-# %%
-investigator.compute_score_distribution()
+#investigator = Investigator()
+#
+#fake_update = investigator.long_scores.copy()
+#rng = np.random.default_rng()
+#fake_update["score"] = rng.normal(size=(len(fake_update)))
+#
+#print(investigator.long_scores[["code", "score"]].head())
+#investigator.update_patient_representation(fake_update)
+#print(investigator.long_scores[["code", "score"]].head())
+## %%
+#investigator.explore = False
+#print(investigator.generate_instruction())
+## %%
+#investigator.compute_score_distribution()
