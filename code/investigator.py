@@ -54,24 +54,28 @@ class Investigator:
         if self.explore:
             return "Continue the conversation"
         most_important_disease = self.long_scores.sort_values(
-            by="symptome", ascending=False
-        ).loc[0, "code"]
-        self.long_data[self.long_scores.code == most_important_disease]
+            by="score", ascending=False
+        ).reset_index(drop=True).loc[0, "code"]
+        print(most_important_disease)
+        most_important_symptoms = self.long_data[self.long_scores.code == most_important_disease].symptome
         instructions = """
         "Ask a short question that explores as many of the following symptoms :
 
         """
-        relevants_symptoms = reduce(concat_sentences, self.long_data[self.long_scores.code == "F60.2"].symptome)
-        return instructions + relevants_symptoms
+        relevants_symptoms = reduce(
+            concat_sentences, most_important_symptoms
+            )
+        return instructions + relevants_symptoms, most_important_symptoms
 
     def compute_score_distribution(self):
-        sum_scores = self.long_scores.groupby("code").sum(numeric_only=True)
+        sum_scores = self.long_scores.groupby("disorder").sum(numeric_only=True)
         sum_scores.sort_values(by="score", ascending=False, inplace=True)
         
         return sum_scores / self.iteration_counter
 
 # %%
 #investigator = Investigator()
+## %%
 #
 #fake_update = investigator.long_scores.copy()
 #rng = np.random.default_rng()
@@ -82,7 +86,10 @@ class Investigator:
 #print(investigator.long_scores[["code", "score"]].head())
 ## %%
 #investigator.explore = False
-#print(investigator.generate_instruction())
+#
+#a, b = investigator.generate_instruction()
+#print(a)
 ## %%
 #investigator.compute_score_distribution()
-#
+
+# %%
