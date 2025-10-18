@@ -17,6 +17,7 @@ def ask_patient(question, conv_history: list[dict]) -> dict:
             You are a patient being interviewed by a mental health medical investigator.
             You must simulate the symptoms of {disorder}, as classified by ICD-10 code {code}.
             Answer the investigator's questions in a way that reflects the experiences and challenges associated with {disorder}.
+            Do not acknowledge symptoms that are not related to your disorder.
             """
             }
             ]
