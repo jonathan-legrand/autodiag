@@ -5,6 +5,8 @@ import sys
 import re
 import pandas as pd
 from pathlib import Path
+import time
+
 
 root_folder = Path('C:/Users/melina.scopin/autodiag/')
 
@@ -51,3 +53,7 @@ with tab_main :
         
 with tab_base :
     st.write('Hello')
+
+
+time.sleep(1)
+st.rerun()
