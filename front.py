@@ -5,6 +5,8 @@ import sys
 import re
 import pandas as pd
 from pathlib import Path
+import time
+
 
 root_folder = Path('C:/Users/Sophie/Documents/Hack1robo/autodiag/')
 
