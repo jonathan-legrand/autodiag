@@ -19,7 +19,8 @@ def call_api(prompt: list, role:str) -> dict:
             message.append({"role": "user", "content": msg["content"]})
         
     response = client.chat.completions.create(
-    model="openai/gpt-4o",
-        messages=message
+        model="openai/gpt-4o",
+            messages=message
     )
-    return response # TODO Parse as needed
+    formatted_response = response.choices[0].message.content 
+    return formatted_response 
