@@ -32,11 +32,10 @@ X = np.stack(embeddings)
 embedding_cols = [f"x_{i}" for i in range(X.shape[1])]
 X_df = pd.DataFrame(X, columns=embedding_cols)
 pd.concat((df, X_df), axis=1).to_csv("desc_embedding.csv")
-
 # %%
 from sklearn.manifold import TSNE
 
-tsne_res = TSNE().fit_transform(X)
+tsne_res = TSNE(perplexity=10).fit_transform(X)
 # %%
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -68,3 +67,19 @@ max_idx = np.argmax(sims.flatten())
 
 print(df.loc[max_idx, "description"])
 print(df.loc[max_idx, "code"])
+
+# %%
+max_indices = np.argsort(sims)[::-1]
+
+for i in range(5):
+   max_idx = max_indices[i]
+   print(df.loc[max_idx, "code"] + f" sim = {sims[max_idx]}")
+   print(df.loc[max_idx, "description"])
+# %%
+print(df.loc[max_indices[i], "description"])
+# %%
+a = get_embedding("Homme")
+b = get_embedding("Animal")
+
+a.T @ b
+   
