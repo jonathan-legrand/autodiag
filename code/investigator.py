@@ -55,7 +55,10 @@ class Investigator:
         return instructions + relevants_symptoms
 
     def compute_score_distribution(self):
-        return self.long_scores.groupby("code").sum(numeric_only=True) / self.iteration_counter
+        sum_scores = self.long_scores.groupby("code").sum(numeric_only=True)
+        sum_scores.sort_values(by="score", ascending=False, inplace=True)
+        
+        return sum_scores / self.iteration_counter
 
 # %%
 investigator = Investigator()
@@ -67,3 +70,8 @@ fake_update["score"] = rng.normal(size=(len(fake_update)))
 print(investigator.long_scores[["code", "score"]].head())
 investigator.update_patient_representation(fake_update)
 print(investigator.long_scores[["code", "score"]].head())
+# %%
+investigator.explore = False
+print(investigator.generate_instruction())
+# %%
+investigator.compute_score_distribution()
