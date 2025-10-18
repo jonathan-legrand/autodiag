@@ -38,8 +38,7 @@ class Investigator:
         labels, patient = get_random_patient()
         self.patient_metadata = patient
         self.actual_diagnoses = labels
-        # print(self.patient_metadata)
-        print("Actual diagnoses:", self.actual_diagnoses)
+        
         # make data_path pathlib-friendly and resolve relative to this file
         data_path = Path(data_path)
         if not data_path.is_absolute():

@@ -17,9 +17,13 @@ def app():
     investigator = st.session_state.dialogue_manager.investigator
 
     ### TO DO - real patient info 
-    patient_info = {'Name': 'Roger', 'Age': 55, 'Sex': 'Male', 
-                   'Clinical history': ['Diabetic', 'Epileptic']}
+    metadata = investigator.patient_metadata
+    
+    patient_info = {'Name': metadata['Full Name'], 'Age': metadata['Age'], 'Sex': metadata['Sex'], 
+                    'Medications' : metadata['Medications']}
+    
 
+    
     if investigator.explore:
         col_info, col_diag = st.columns(2)
 
@@ -32,34 +36,33 @@ def app():
             # Question container
             with st.container(border=True):
                 st.markdown('**Suggested question:**')
+                st.markdown(investigator.suggested_question)
+
                 if st.button("Ask next question"):
                     result = st.session_state.dialogue_manager.process_interaction()
                     st.rerun()
 
-                st.markdown(investigator.suggested_question)
-
+                
         # Diagnosis probability chart
-        with col_diag:
-            diagnosis_proba = investigator.compute_score_distribution()
-            if isinstance(diagnosis_proba, pd.DataFrame):
+        if investigator.iteration_counter > 0 : 
+            with col_diag:
 
-                # Création du bar chart avec barres horizontales
-                plot_diagnosis(diagnosis_proba)
+                diagnosis_proba = investigator.compute_score_distribution()
+                if isinstance(diagnosis_proba, pd.DataFrame):
+
+                    # Création du bar chart avec barres horizontales
+                    plot_diagnosis(diagnosis_proba)
 
 
     else:
-        disorder = investigator.diagnose() # create function diagnose to get the best diagnosis (not already false and max symptoms)
-        symptoms = investigator.associated_symptoms(disorder) # compute the list of symptoms associated with the disorder
+        disorder, symptoms = investigator.diagnose()
         symptoms_bool = check_criteria(disorder, symptoms)
 
-        if sum(symptoms_bool) >= investigator.min_symptoms :  # = 3 (but maybe initialize in investigator?)
+        if sum(symptoms_bool) >= investigator.min_symptoms :  
 
             criteria_bool = check_criteria('Diagnosis criteria', criteria_list)
             if sum(criteria_bool) == len(criteria_bool) : 
                 st.write('YAY you are sick')
-
-
-        
 
 
 if __name__ == "__main__":

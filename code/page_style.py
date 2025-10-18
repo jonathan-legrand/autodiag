@@ -102,7 +102,7 @@ def check_criteria(title, criteria) :
         criteria_bool = [0 for _ in criteria]
 
         for s in range(len(criteria)) :
-            criteria_bool[s] = st.checkbox("Form checkbox", key = f'title {s}')
+            criteria_bool[s] = st.checkbox(criteria[s], key = f'title {s}')
         
 
         # Every form must have a submit button.
