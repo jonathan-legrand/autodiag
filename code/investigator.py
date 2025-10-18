@@ -36,6 +36,10 @@ class Investigator:
         self.system_conversation_history = []
 
 
+    @property
+    def suggested_question(self):
+        return self.conversation_history[-1]["content"]
+
     def update_conversation_history(self, message: str, role: str):
         self.conversation_history.append({"role": role, "content": message})
 
