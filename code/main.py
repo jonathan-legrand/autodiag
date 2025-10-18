@@ -23,22 +23,22 @@ def ask_patient(question, conv_history: list[dict]) -> dict:
     
     question_msg = [{"role": "assistant", "content": question}]
 
-    api_response = call_api(system_msg + conv_history + question_msg, role="patient")
-    formatted_response = api_response.choices[0].message.content
+    response = call_api(system_msg + conv_history + question_msg, role="patient")
     
-    return formatted_response
-    
+    return response
+
 INITIAL_QUESTION = "What brings you today?"
 FRONT_EXPORT_PATH = "data/investigator.pkl"
 
 def main():
     investigator = Investigator()
     question = INITIAL_QUESTION
+    investigator.update_conversation_history(question, role="clinician")
     while True:
+        breakpoint()
         print("Asking patient")
         response = ask_patient(question, investigator.conversation_history)
         investigator.update_conversation_history(response, role="patient")
-        breakpoint()
         symptoms_score = symptoms_func(response)
         print("Updating patient representation")
         investigator.update_patient_representation(symptoms_score)
@@ -47,6 +47,7 @@ def main():
 
         instruction =  investigator.generate_instruction()
         question = call_api(instruction, role="clinician")
+        investigator.update_conversation_history(question, role="clinician")
 
         print("Investigator instruction:", instruction)
 
