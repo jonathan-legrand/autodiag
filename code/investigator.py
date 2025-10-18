@@ -2,6 +2,7 @@
 # %%
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from functools import reduce
 
@@ -15,6 +16,13 @@ class Investigator:
         self.n_switch_cycles = n_switch_cycles
         self.iteration_counter = 0
         self.explore = True
+
+        # make data_path pathlib-friendly and resolve relative to this file
+        data_path = Path(data_path)
+        if not data_path.is_absolute():
+            # resolve relative to the repository/code file location (works on Windows)
+            data_path = (Path(__file__).resolve().parent / data_path).resolve()
+
 
         long_data = pd.read_csv(data_path, index_col=0)
         long_scores = long_data.copy()
