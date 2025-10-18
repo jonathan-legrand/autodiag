@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import os
+from text_preprocessing import preprocess_sentence
 from dotenv import load_dotenv
 load_dotenv()
 base_url = os.getenv("LMSTUDIO_BASE_URL")
@@ -31,7 +32,9 @@ with open(symptoms_embeddings_path, 'rb') as fp:
         symptoms_embeds = pickle.load(fp)
 
 
-def distance_rep_patient(rep_patient:str) : 
+def distance_rep_patient(rep_patient:str, preprocess=True):
+    if preprocess:
+        rep_patient = preprocess_sentence(rep_patient) 
     rep_embedding  = get_embedding(rep_patient)
 
     criteria_embedding = np.stack(symptoms_embeds['embedding'])
