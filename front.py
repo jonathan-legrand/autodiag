@@ -13,14 +13,31 @@ root_folder = Path('C:/Users/Sophie/Documents/Hack1robo/autodiag/')
 st.markdown(
     """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500;600;700&display=swap');
+    /* Application globale */
+    html, body, .block-container{
+        font-family: 'Commissioner', sans-serif;
+    }{
+        font-family: 'Commissioner', sans-serif;
+    }
+
+    /* Optionnel : affiner la hiérarchie visuelle */
+    h1, h2, h3, h4 {
+        font-weight: 600;
+    }
+
+    p, li, span, div {
+        font-weight: 400;
+    }
+    
     /* Supprimer les marges/paddings latéraux et forcer largeur à 100% */
     .css-18e3th9,  /* container principal */
     .css-1d391kg,  /* autre container possible */
     .block-container {
-        padding-left: 2 !important;
-        padding-right: 2 !important;
-        margin-left: 2 !important;
-        margin-right: 2 !important;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+        margin-left: 2px !important;
+        margin-right: 2px !important;
         max-width: 100% !important;
         width: 100% !important;
     }
@@ -49,10 +66,10 @@ diagnosis_proba = pd.read_csv(root_folder / 'data/sample_proba.csv')
 
 
 
-col_info, col_discussion, col_diag = st.columns([1,2,3])
+col_info,  col_discussion, col_diag = st.columns([1,1,3])
 
 with col_info : 
-
+    
     with st.container(border = True) : 
         st.markdown('**Patient informations**')
         for category in patient_info.keys():
@@ -66,7 +83,8 @@ with col_info :
         st.markdown('**Summary**')
         for recap_i in recap : 
             st.markdown(f'- {recap_i}')
-with col_discussion: 
+
+with col_discussion :
     with st.container(border = True) : 
         st.markdown('**Suggested question:**')
 
