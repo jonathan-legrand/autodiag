@@ -6,6 +6,7 @@ import re
 import pandas as pd
 from pathlib import Path
 import time
+import plotly.express as px
 
 
 
@@ -86,7 +87,26 @@ with col_diag :
     diagnosis_proba = diagnosis_proba.sort_values(by = 'symptome', ascending=False)
     diagnosis_proba = diagnosis_proba[diagnosis_proba.index < 5]
     # diagnosis_proba = diagnosis_proba.drop(labels =['index'])
-    st.bar_chart(diagnosis_proba, horizontal = True, x = 'disorder', y = 'symptome', height = 500, sort = False)
+    # Ajout d'une colonne pour les couleurs personnalisées
+    colors = ["#F8C8DC", "#A8DADC", "#CFFFE5", "#FFF3B0", "#DCC6E0"]
+    diagnosis_proba['color'] = colors
+
+    # Création du bar chart avec barres horizontales
+    fig = px.bar(
+        diagnosis_proba,
+        x='disorder',
+        y='symptome',
+        orientation='h',
+        color='symptome',
+        color_discrete_sequence=colors,
+        height=500
+    )
+
+    # Suppression de la légende si tu ne veux pas de doublon
+    fig.update_layout(showlegend=False)
+
+    # Affichage dans Streamlit
+    st.plotly_chart(fig)
 
 
 
