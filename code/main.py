@@ -15,13 +15,12 @@ def main():
     question = "What brings you today?"
     while True:
         response = ask_patient(question)
-
     
         symptoms_score = symptoms_func(response)
         investigator.update_patient_representation(symptoms_score)
         # TODO update clinical reprot
         # investigator.update_clinical_report()
-        
+
         instruction =  investigator.generate_instruction()
 
 
