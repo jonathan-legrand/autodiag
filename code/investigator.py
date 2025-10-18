@@ -33,14 +33,11 @@ class Investigator:
 
         self.conversation_history = []
         self.conversation_summary = []
+        self.system_conversation_history = []
 
 
-    # TODO
-    def update_patient_representation(self):
-        # append ton conv history
-        # generate summary of actual known state of patient  
-        pass    
-
+    def update_conversation_history(self, message: str, role: str):
+        self.conversation_history.append({"role": role, "content": message})
 
     def update_patient_representation(self, new_scores):
         self.long_scores["score"] += new_scores["score"]
@@ -51,21 +48,56 @@ class Investigator:
             self.explore = False
 
     def generate_instruction(self):
-        if self.explore:
-            return "Continue the conversation"
-        most_important_disease = self.long_scores.sort_values(
-            by="score", ascending=False
-        ).reset_index(drop=True).loc[0, "code"]
-        print(most_important_disease)
-        most_important_symptoms = self.long_data[self.long_scores.code == most_important_disease].symptome
-        instructions = """
-        "Ask a short question that explores as many of the following symptoms :
-
-        """
-        relevants_symptoms = reduce(
-            concat_sentences, most_important_symptoms
+        # determine top disease and relevant symptoms (safe handling)
+        if self.long_scores["score"].abs().sum() == 0:
+            most_important_disease = None
+            relevant_symptoms = ""
+        else:
+            most_important_disease = (
+                self.long_scores.sort_values(by="score", ascending=False)
+                .reset_index(drop=True)
+                .loc[0, "disorder"]
             )
-        return instructions + relevants_symptoms, most_important_symptoms
+            # select symptom column safely, drop NA, convert to strings
+            sympt_series = (
+                self.long_data.loc[self.long_data.index[self.long_scores.code == most_important_disease], "symptome"]
+                if "disorder" in self.long_scores.columns
+                else self.long_data["symptome"]
+            )
+            sympt_list = [str(s).strip() for s in pd.Series(sympt_series).dropna().tolist() if str(s).strip()]
+            relevant_symptoms = ". ".join(sympt_list)
+
+        # choose prompt text based on mode (do not return early)
+        if self.explore:
+            prompt_text = (
+                "Continue the conversation with the patient to explore their symptoms. "
+                f"Focus on gathering information about the following symptoms: {relevant_symptoms}. "
+                "Ask concise and relevant questions to better understand the patient's condition."
+            )
+        else:
+            prompt_text = (
+                f"Based on the patient's responses, it appears that the most relevant diagnosis is "
+                f"{most_important_disease}. To confirm this diagnosis, ask targeted questions about the "
+                f"following symptoms: {relevant_symptoms}. Your goal is to gather specific information that "
+                "will help validate or refute this diagnosis."
+            )
+
+        # build chat-style messages: include a system message and the conversation + current instruction
+        system_msg = {
+            "role": "system",
+            "content": "You are a concise mental health medical interviewer. Ask short, relevant questions to gather patient information."
+        }
+
+        # preserve conversation_history if it contains role/content dicts, otherwise join strings
+        if self.conversation_history and isinstance(self.conversation_history[0], dict) and "role" in self.conversation_history[0]:
+            history_msgs = self.conversation_history[:]  # already message dicts
+        else:
+            history_text = "\n".join(self.conversation_history) if self.conversation_history else ""
+            history_msgs = [{"role": "user", "content": history_text}] if history_text else []
+
+        instruction_msg = {"role": "user", "content": prompt_text}
+
+        return [system_msg] + history_msgs + [instruction_msg]
 
     def compute_score_distribution(self):
         sum_scores = self.long_scores.groupby("disorder").sum(numeric_only=True)
