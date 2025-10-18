@@ -8,36 +8,20 @@ from pathlib import Path
 import time
 
 
+
 root_folder = Path('C:/Users/Sophie/Documents/Hack1robo/autodiag/')
 
 st.markdown(
     """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500;600;700&display=swap');
-    /* Application globale */
-    html, body, .block-container{
-        font-family: 'Commissioner', sans-serif;
-    }{
-        font-family: 'Commissioner', sans-serif;
-    }
-
-    /* Optionnel : affiner la hiérarchie visuelle */
-    h1, h2, h3, h4 {
-        font-weight: 600;
-    }
-
-    p, li, span, div {
-        font-weight: 400;
-    }
-    
+    <style>  
     /* Supprimer les marges/paddings latéraux et forcer largeur à 100% */
     .css-18e3th9,  /* container principal */
     .css-1d391kg,  /* autre container possible */
     .block-container {
-        padding-left: 2px !important;
-        padding-right: 2px !important;
-        margin-left: 2px !important;
-        margin-right: 2px !important;
+        padding-left: 75px !important;
+        padding-right: 75px !important;
+        margin-left: 20px !important;
+        margin-right: 20px !important;
         max-width: 100% !important;
         width: 100% !important;
     }
@@ -46,57 +30,66 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown(
-    """
-    <h1 style='text-align: center;
-        font-size: 48px;  
-        margin-top: 10px; 
-        margin-bottom: 20px; 
-        '>Autodiag</h1>
-    """,
-    unsafe_allow_html=True
-)
-
 
 
 ### insert real values
 recap = ['Patient is sad', 'Patient hates their mum']
-patient_info = {'Name' : 'Roger', 'Age' : 55, 'Sex': 'Male', 'Previous diagnostic': [], 'Clinical history' : ['Diabetic', 'Epileptic']}
+patient_info = {'Name' : 'Roger', 'Age' : 55, 'Sex': 'Male', 'Clinical history' : ['Diabetic', 'Epileptic']}
 diagnosis_proba = pd.read_csv(root_folder / 'data/sample_proba.csv')
 
 
 
-col_info,  col_discussion, col_diag = st.columns([1,1,3])
+col_info, col_diag = st.columns(2)
 
 with col_info : 
+    with st.container(border = False, width = 500, height = 100) :
+     # Deux colonnes : image à gauche, infos à droite
+        col_img, col_info_text = st.columns([1, 3])  # Ratio 1:3
+
+        with col_img:
+            st.image("https://via.placeholder.com/100", width=100)  # Image par défaut
+
+        with col_info_text:
+            lines = []
+            for category, contenu in patient_info.items():
+                if isinstance(contenu, list):
+                    contenu = ", ".join(contenu)
+                lines.append(f"<strong>{category}</strong>: {contenu}")
     
-    with st.container(border = True) : 
-        st.markdown('**Patient informations**')
-        for category in patient_info.keys():
-            contenu = patient_info[category]
-            if type(contenu) == list : 
-                contenu = ", ".join(contenu)
-            
-            st.markdown(f'- {category} : {contenu}')
+        # Assemble les lignes avec des <br> HTML
+        joined_lines = "<br>".join(lines)
+
+        # Injecte du style CSS + contenu
+        st.markdown("""
+            <style>
+                .big-font {
+                    font-size: 15px !important;
+                    line-height: 1.2;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+
+        # Affiche le texte avec la classe CSS
+        st.markdown(f'<p class="big-font">{joined_lines}</p>', unsafe_allow_html=True)
 
     with st.container(border = True) : 
-        st.markdown('**Summary**')
+        st.markdown('**Interview report**')
         for recap_i in recap : 
             st.markdown(f'- {recap_i}')
 
-with col_discussion :
     with st.container(border = True) : 
-        st.markdown('**Suggested question:**')
+            st.markdown('**Suggested question:**')
 
-        ### INSERT REAL VALUES
-        st.markdown('Hi, what brings you here today?')
-
+            ### INSERT REAL VALUES
+            st.markdown('Hi, what brings you here today?')
 with col_diag : 
     diagnosis_proba = diagnosis_proba.sort_values(by = 'symptome', ascending=False)
     diagnosis_proba = diagnosis_proba[diagnosis_proba.index < 5]
     # diagnosis_proba = diagnosis_proba.drop(labels =['index'])
     st.bar_chart(diagnosis_proba, horizontal = True, x = 'disorder', y = 'symptome', height = 500, sort = False)
-    
+
+
+
 # Refresh every second
 time.sleep(1)
 st.rerun()
