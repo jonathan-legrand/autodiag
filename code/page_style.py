@@ -95,17 +95,3 @@ def plot_diagnosis(diagnosis_proba):
     st.plotly_chart(fig)
 
     
-def check_criteria(title, criteria) : 
-    with st.form("my_form"):
-        st.write(title)
-        
-        criteria_bool = [0 for _ in criteria]
-
-        for s in range(len(criteria)) :
-            criteria_bool[s] = st.checkbox(criteria[s], key = f'title {s}')
-        
-
-        # Every form must have a submit button.
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            return criteria_bool

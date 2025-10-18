@@ -6,13 +6,16 @@ from pathlib import Path
 
 from functools import reduce
 
+from final_diagnosis import initial_disorder
+
 def concat_sentences(x, y):
     return x + ". " + y
 
 def most_important(object) : 
     # TO DO need to check that most important disease was not already investigated as false 
-
-    most_important_disease = object.long_scores.sort_values(
+    verified_diseases = object.verified_disorders
+    bad_diseases = [disease for disease in verified_diseases if verified_diseases[disease] == 0]
+    most_important_disease = object.long_scores[~object.long_scores.disorder.isin(bad_diseases)].sort_values(
             by="score", ascending=False
         ).reset_index(drop=True).loc[0, "disorder"]
     most_important_symptoms = object.long_data[object.long_scores.disorder == most_important_disease].symptome
@@ -31,6 +34,8 @@ class Investigator:
         self.patient_metadata = {
 
         }
+
+        self.verified_disorders = initial_disorder()
 
 
         # init random patient from llm_patients db
@@ -120,6 +125,11 @@ class Investigator:
     
     def diagnose(self) : 
         return most_important(self)
+    
+    def update_disease(self, disorder, success) : 
+        self.verified_disorders[disorder] = success
+        
+
         
         
 
