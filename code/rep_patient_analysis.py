@@ -6,10 +6,13 @@ from openai import OpenAI
 import numpy as np
 import pandas as pd
 from pathlib import Path
-
-MODEL = "text-embedding-embeddinggemma-300m-qat"
+import os
+from dotenv import load_dotenv
+load_dotenv()
+base_url = os.getenv("LMSTUDIO_BASE_URL")
+MODEL = os.getenv("LMSTUDIO_MODEL")
 client = OpenAI(
-    base_url="http://127.0.0.1:1234/v1",
+    base_url=base_url,
     api_key="lm-studio"
 )
 def get_embedding(text:str, model=MODEL):
