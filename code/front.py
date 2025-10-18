@@ -1,7 +1,7 @@
 import streamlit as st
 from main import DialogueManager
 import pandas as pd
-from page_style import init_style, image_url, plot_diagnosis, write_info
+from page_style import start_window, show_recap, plot_diagnosis, check_criteria, criteria_list
 
 # Initialize session state
 def init_session_state():
@@ -10,8 +10,8 @@ def init_session_state():
 
 
 def app():
-    st.markdown(init_style,unsafe_allow_html=True)
-    st.title("Medical Interview System")
+    start_window()
+    
     init_session_state()
 
     investigator = st.session_state.dialogue_manager.investigator
@@ -24,24 +24,10 @@ def app():
         col_info, col_diag = st.columns(2)
 
         with col_info:
-            # Patient info container
-            with st.container(border=False):
-                col_img, col_info_text = st.columns([1, 3])
-                with col_img:
-                    st.image(image_url, width=100)
-                with col_info_text:
-                    lines = write_info(patient_info)
-                    
-                    st.markdown(
-                        f'<p class="big-font">{"<br>".join(lines)}</p>', 
-                        unsafe_allow_html=True
-                    )
 
-            # Interview report container
-            with st.container(border=True):
-                st.markdown('**Interview report**')
-                for recap in investigator.conversation_summary:
-                    st.markdown(f'- {recap}')
+            summary = investigator.conversation_summary
+
+            show_recap(patient_info, summary)
 
             # Question container
             with st.container(border=True):
@@ -62,7 +48,19 @@ def app():
 
 
     else:
-        st.write('diagnosis')
+        disorder = investigator.diagnose() # create function diagnose to get the best diagnosis (not already false and max symptoms)
+        symptoms = investigator.associated_symptoms(disorder) # compute the list of symptoms associated with the disorder
+        symptoms_bool = check_criteria(disorder, symptoms)
+
+        if sum(symptoms_bool) >= investigator.min_symptoms :  # = 3 (but maybe initialize in investigator?)
+
+            criteria_bool = check_criteria('Diagnosis criteria', criteria_list)
+            if sum(criteria_bool) == len(criteria_bool) : 
+                st.write('YAY you are sick')
+
+
+        
+
 
 if __name__ == "__main__":
     app()

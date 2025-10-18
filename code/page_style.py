@@ -7,8 +7,7 @@ from pathlib import Path
 import plotly.express as px
 
 
-
-root_folder = Path('C:/Users/Sophie/Documents/Hack1robo/autodiag/')
+criteria_list = ['Do these symptoms last longer than 2 weeks?', 'Do these symptoms have an impact on private and professional life?', 'Do these symptoms cause significant suffering?']
 
 init_style = """
     <style>  
@@ -26,7 +25,40 @@ init_style = """
     </style>
     """
 
+def start_window() : 
+    st.markdown(init_style,unsafe_allow_html=True)
+    st.title("Medical Interview System")
+
 image_url = "https://via.placeholder.com/100"
+
+def write_info(df) : 
+    lines = []
+    for category, content in df.items():
+        if isinstance(content, list):
+            content = ", ".join(content)
+        lines.append(f"<strong>{category}</strong>: {content}")
+    return lines
+
+def show_recap(patient_info, summary) : 
+    # Patient info container
+    with st.container(border=False):
+        col_img, col_info_text = st.columns([1, 3])
+        with col_img:
+            st.image(image_url, width=100)
+        with col_info_text:
+            lines = write_info(patient_info)
+            
+            st.markdown(
+                f'<p class="big-font">{"<br>".join(lines)}</p>', 
+                unsafe_allow_html=True
+            )
+
+    # Interview report container
+    with st.container(border=True):
+        st.markdown('**Interview report**')
+        for recap in summary:
+            st.markdown(f'- {recap}')
+
 
 colors_plot = ["#F8C8DC", "#A8DADC", "#CFFFE5", "#FFF3B0", "#DCC6E0"]
 
@@ -63,10 +95,17 @@ def plot_diagnosis(diagnosis_proba):
     st.plotly_chart(fig)
 
     
-def write_info(df) : 
-    lines = []
-    for category, content in df.items():
-        if isinstance(content, list):
-            content = ", ".join(content)
-        lines.append(f"<strong>{category}</strong>: {content}")
-    return lines
+def check_criteria(title, criteria) : 
+    with st.form("my_form"):
+        st.write(title)
+        
+        criteria_bool = [0 for _ in criteria]
+
+        for s in range(len(criteria)) :
+            criteria_bool[s] = st.checkbox("Form checkbox", key = f'title {s}')
+        
+
+        # Every form must have a submit button.
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            return criteria_bool
