@@ -27,8 +27,10 @@ class Investigator:
 
 
         # init random patient from llm_patients db
-        from patients.patient import get_random_patient
-        labels, patient = get_random_patient()
+        from patients.patient import get_random_patient, get_patient_from_disorder
+        # labels, patient = get_random_patient()
+        labels, patient = get_patient_from_disorder("borderline")
+        print("Selected patient with disorders:", labels)
         self.patient_metadata = patient
         self.actual_diagnoses = labels
         
