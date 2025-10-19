@@ -61,8 +61,8 @@ def distance_rep_patient(rep_patient:str, preprocess=True):
     distance = rep_embedding @ criteria_embedding.T
 
     # keep on
-    thr = np.min((np.percentile(distance, 99.9), 0.99))
-    distance = np.where(distance >= thr, 1, 0)
+    #thr = np.min((np.percentile(distance, 99.9), 0.99))
+    #distance = np.where(distance >= thr, 1, 0)
     # extract only max value
     # distance = np.where(distance == np.max(distance), 1, 0)
 

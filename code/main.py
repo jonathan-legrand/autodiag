@@ -64,18 +64,17 @@ class DialogueManager:
         print("Reformulated response:", reformulated_response)
         for symptom in reformulated_response:
             symptoms_score = symptoms_func(symptom)
+            q = symptoms_score.score.quantile(0.99)
+            symptoms_score = symptoms_score.where(symptoms_score.score > q, 0)
             self.investigator.update_patient_representation(symptoms_score)
-            print(f"Symptom scores for '{symptom}':", symptoms_func(symptom).where(symptoms_func(symptom)['score']>0).dropna())
+            #print(f"Symptom scores for '{symptom}':", symptoms_func(symptom).where(symptoms_func(symptom)['score']>0.5).dropna())
+            print(f"Symptom scores for '{symptom}':", symptoms_score.sort_values(by="score", ascending=False))
         self.investigator.iteration_counter += 1 
         
         instruction = self.investigator.generate_instruction()
         self.question = call_api(instruction, role="clinician")
         self.investigator.update_conversation_history(self.question, role="clinician")
         
-        # # Save state
-        # with open(FRONT_EXPORT_PATH, "wb") as stream:
-        #     pickle.dump(self.investigator, stream)
-            
         return {
             "response": response,
             "next_question": self.question,

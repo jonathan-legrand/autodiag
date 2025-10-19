@@ -10,7 +10,6 @@ from functools import reduce
 def concat_sentences(x, y):
     return x + ". " + y
 
-
 class Investigator:
     def __init__(self, n_switch_cycles=5, data_path="../data/datalong.csv"):
 
@@ -66,8 +65,8 @@ class Investigator:
 
     def update_patient_representation(self, new_scores):
         self.long_scores["score"] += new_scores["score"]
-        self.long_scores["score"] = np.where(
-            self.long_scores["score"] >= 1, 1, self.long_scores["score"])
+        #self.long_scores["score"] = np.where(
+        #    self.long_scores["score"] >= 1, 1, self.long_scores["score"])
 
         # first proxy: n cycles
         if self.iteration_counter > self.n_switch_cycles:
@@ -76,7 +75,7 @@ class Investigator:
     def most_important(self): 
         # TODO use same func in most_important and compute_score_distribution
         # TO DO need to check that most important disease was not already investigated as false 
-        most_important_disease = self.long_scores.groupby("disorder").mean(numeric_only=True).reset_index().sort_values(
+        most_important_disease = self.long_scores.groupby("disorder").max(numeric_only=True).reset_index().sort_values(
                 by="score", ascending=False
             ).iloc[0]["disorder"]
         most_important_symptoms = self.long_data[self.long_scores.disorder == most_important_disease].symptome
@@ -95,7 +94,7 @@ class Investigator:
         if self.explore:
             prompt_text = (
                 "Continue the conversation with the patient to explore their symptoms. "
-                f"Focus on gathering information about the patient's symptoms. "
+                f"Focus on gathering information about the patient's symptoms."
                 "Ask concise and relevant questions to better understand the patient's condition."
                 "Show empathy and try to adapt your question the patient's symptoms"
             )
@@ -125,9 +124,10 @@ class Investigator:
         return [system_msg] + history_msgs + [instruction_msg]
 
     def compute_score_distribution(self):
-        sum_scores = self.long_scores.groupby("disorder").mean(numeric_only=True).reset_index()
+        sum_scores = self.long_scores.groupby("disorder").max(numeric_only=True).reset_index()
         sum_scores.sort_values(by="score", ascending=False, inplace=True)
-        sum_scores["score"] = sum_scores["score"] / self.iteration_counter
+        #sum_scores["score"] = sum_scores["score"] / self.iteration_counter
+        sum_scores["score"] = sum_scores["score"] / sum_scores["score"].max()
         print(f"top disorder in the score distribution: {sum_scores.iloc[0]['disorder']} with score {sum_scores.iloc[0]['score']}")
         return sum_scores
     
