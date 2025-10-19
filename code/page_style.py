@@ -27,7 +27,7 @@ init_style = """
 
 def start_window() : 
     st.markdown(init_style,unsafe_allow_html=True)
-    st.title("Medical Interview System")
+    st.title("Artificial Diagnosis")
 
 image_url = "https://via.placeholder.com/100"
 
@@ -94,4 +94,4 @@ def plot_diagnosis(diagnosis_proba):
     # Afficher le graphique dans Streamlit
     st.plotly_chart(fig)
 
-    
+colors_chat = {'clinician' : 'blue', 'patient' : 'red'}  # gris clair / bleu clair
