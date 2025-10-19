@@ -51,7 +51,7 @@ def reformulate_patient_response(rep_patient:str):
     response = response.split(",")
     return response, contains_symptoms
 
-def distance_rep_patient(rep_patient:str, preprocess=False):
+def distance_rep_patient(rep_patient:str, preprocess=True):
     if preprocess:
         rep_patient = preprocess_sentence(rep_patient) 
     rep_embedding  = get_embedding(rep_patient)
