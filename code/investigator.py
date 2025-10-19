@@ -66,6 +66,8 @@ class Investigator:
 
     def update_patient_representation(self, new_scores):
         self.long_scores["score"] += new_scores["score"]
+        self.long_scores["scores"] = np.where(
+            self.long_scores["score"] >= 1, 1, self.long_scores["score"])
 
         # first proxy: n cycles
         if self.iteration_counter > self.n_switch_cycles:
