@@ -40,6 +40,8 @@ class Investigator:
 
 
         long_data = pd.read_csv(data_path, index_col=0)
+        mask = (long_data.disorder != "Somatic Symptom Disorder") # Oddly defined disorder
+        long_data = long_data[mask]
         long_scores = long_data.copy()
         long_scores["score"] = np.zeros(shape=(len(long_data)))
         self.long_scores = long_scores
