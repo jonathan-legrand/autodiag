@@ -1,0 +1,6 @@
+seaborn
+pandas
+python-dotenv
+numpy
+requests
+openai

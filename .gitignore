@@ -1,2 +1,4 @@
 __pycache__
+code/.env
 .env
+venv/*
