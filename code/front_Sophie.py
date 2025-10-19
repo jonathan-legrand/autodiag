@@ -9,9 +9,12 @@ import time
 import pickle
 from investigator import Investigator
 import plotly.express as px
+import plotly.graph_objects as go
 
 # root_folder = Path('C:/Users/achil/Documents/autodiag/')
-root_folder = Path('C:/Users/Sophie/Documents/Hack1robo/autodiag/')
+root_folder = Path('C:/Users/Sophie/Desktop/Hack1robo/autodiag/')
+
+chemin_logo_footer = '/data/logo-diagnostic-artificiel-3.png'
 # Simuler une "base de données" utilisateur
 USERS = {
     "sophie": "monmotdepasse",
@@ -197,6 +200,8 @@ if investigator.explore :
     
         # st.bar_chart(diagnosis_proba, horizontal = True, x = 'disorder', y = 'score', height = 500, sort = False)
         plot_diagnosis_bar_chart(diagnosis_proba)
+
+        st.columns(5)[4].image(f'{root_folder}/data/logo-diagnostic-artificiel-3.png', width = 500)
 elif diagnosis: 
     col_info, col_diag = st.columns(2)
 
@@ -298,6 +303,41 @@ else :
         if st.button("Close the session"):
             st.warning("Session fermée ! (placeholder)")
         st.markdown('</div>', unsafe_allow_html=True)
+
+
+def footer(chemin_logo_footer) :
+    footer="""<style>
+    a:link , a:visited{
+    color: blue;
+    background-color: transparent;
+    text-decoration: underline;
+    }
+
+    a:hover,  a:active {
+    color: red;
+    background-color: transparent;
+    text-decoration: underline;
+    }
+
+    .footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    color: black;
+    text-align: center;
+    padding-bottom : 0px !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    margin-bottom: 0px ! important;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    }
+    </style>
+    """
+    st.markdown(footer,unsafe_allow_html=True)
+    st.columns(10)[9].image(f'{root_folder}{chemin_logo_footer}', width = 200)
+
   
 
 
