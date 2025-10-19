@@ -1,0 +1,7 @@
+[theme]
+primaryColor = "#7DBDFF"                # Bleu principal
+backgroundColor = "#FFF8EE"             # Fond clair
+secondaryBackgroundColor = "#E3E7EC"    # Fond sidebar
+textColor = "#382c2cff"                   # Texte
+accentColor = "#f22bc7ff"                 # Accent (hover, liens)
+font = "sans serif"

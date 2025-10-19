@@ -28,7 +28,10 @@ init_style = """
 
 def start_window() : 
     st.markdown(init_style,unsafe_allow_html=True)
-    st.title("Artificial Diagnosis")
+    st.markdown(
+    "<h1 style='color:#F28E2B; font-weight:800;'>Artificial Diagnosis</h1>",
+    unsafe_allow_html=True
+)
 
 image_path = Path('../data/Icone_patient.png')
 
@@ -44,7 +47,7 @@ def write_info(df) :
         lines.append(f"<strong>{category}</strong>: {content}")
     return lines
 
-def show_recap(patient_info, summary) : 
+def show_recap(patient_info, summary, n = 0) : 
     # Patient info container
     with st.container(border=False):
         col_img, col_info_text = st.columns([1, 3])
@@ -58,11 +61,13 @@ def show_recap(patient_info, summary) :
                 unsafe_allow_html=True
             )
 
-    # Interview report container
-    with st.container(border=True):
-        st.markdown('**Interview report**')
-        for recap in summary:
-            st.markdown(f'- {recap}')
+    if n > 0 : 
+
+        # Interview report container
+        with st.container(border=True):
+            st.markdown('**Interview report**')
+            for recap in summary:
+                st.markdown(f'- {recap}')
 
 
 colors_plot = ["#F8C8DC", "#A8DADC", "#CFFFE5", "#FFF3B0", "#DCC6E0"]
@@ -101,6 +106,7 @@ def plot_diagnosis(diagnosis_proba):
         tickvals = [0,0.25,0.5,0.75,1],
     )
 )
+    fig.update_traces(width=0.5)
 
     # Afficher le graphique dans Streamlit
     st.plotly_chart(fig)

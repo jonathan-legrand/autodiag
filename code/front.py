@@ -34,9 +34,12 @@ def app():
 
         with col_info:
 
-            summary = investigator.conversation_summary
+            if len(investigator.clinical_report) > 0 :
+                summary = investigator.clinical_report[-1]
+            else : 
+                summary = ''
 
-            show_recap(patient_info, summary)
+            show_recap(patient_info, summary, n = investigator.iteration_counter)
 
             # Question container
             with st.container(border=True):
@@ -98,10 +101,10 @@ def app():
         elif st.session_state.step == 3:
             if st.session_state.result == "success" :
                 
-                st.success(f"✅ Patient has {disorder}") 
+                st.success(f"✅ Patient has **{disorder}**") 
     
             else: 
-                st.write(f':red[**{disorder}** was not confirmed by diagnosis]')
+                st.error(f'**{disorder}** was not confirmed by diagnosis]')
 
     with st.sidebar : 
         st.markdown(':red[**Simulation**]')
