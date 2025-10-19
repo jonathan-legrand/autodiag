@@ -38,5 +38,5 @@ def call_api(prompt: list, role:str) -> dict:
         )
         formatted_response = response.choices[0].message.content 
     else:
-        formatted_response = "pippopippou debug"
+        formatted_response = "I have been feeling very anxious lately"
     return formatted_response 
