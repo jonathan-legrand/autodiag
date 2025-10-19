@@ -5,6 +5,7 @@ import pandas as pd
 from pathlib import Path
 
 import plotly.express as px
+import plotly.graph_objects as go
 
 import time
 
@@ -98,6 +99,7 @@ def plot_diagnosis(diagnosis_proba):
         color_discrete_sequence=custom_colors,
         height=500,
         range_x = [0,1.05]
+        # text = diagnosis_proba['disorder']
     )
     # Retirer la légende
     fig.update_layout(showlegend=False, 
@@ -106,10 +108,15 @@ def plot_diagnosis(diagnosis_proba):
         tickvals = [0,0.25,0.5,0.75,1],
     )
 )
-    fig.update_traces(width=0.5)
+    fig.update_traces(width=0.3)
+    # fig.update_yaxes(visible=False)
 
     # Afficher le graphique dans Streamlit
     st.plotly_chart(fig)
+
+
+
+
 
 colors_chat = {'clinician' : 'blue', 'patient' : 'red'}  # gris clair / bleu clair
 

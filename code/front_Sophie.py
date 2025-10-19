@@ -19,12 +19,14 @@ USERS = {
 }
 
 def login():
-    st.image(f'{root_folder}/data/Icone_Patient.png')
+    st.columns(3)[1].image(f'{root_folder}/data/logo-diagnostic-artificiel-5.png', width = 800)
 
-    username = st.text_input("email")
-    password = st.text_input("Password", type="password")
+    username = st.columns(5)[2].text_input("email")
+    password = st.columns(5)[2].text_input("Password", type="password")
 
-    if st.button("Se connecter"):
+    
+    if st.columns(5)[2].button("Log in", key="button1", type = "primary"):
+
         if username in USERS and USERS[username] == password:
             st.success(f"Bienvenue {username} !")
             st.session_state["logged_in"] = True
@@ -229,9 +231,12 @@ elif diagnosis:
 
             # Affiche le texte avec la classe CSS
             st.markdown(f'<p class="big-font">{joined_lines}</p>', unsafe_allow_html=True)
+    
+    
+    st.write("Disorder")
+    
     with st.form("my_form"):
-        st.write("Disorder")
-        
+                
         checkbox_val = st.checkbox("Form checkbox", key = 0)
         checkbox_val1 = st.checkbox("Form checkbox", key = 1)
         # Every form must have a submit button.
