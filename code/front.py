@@ -3,6 +3,8 @@ from main import DialogueManager
 import pandas as pd
 from page_style import start_window, show_recap, plot_diagnosis, criteria_list
 
+
+
 # Initialize session state
 def init_session_state():
     if 'dialogue_manager' not in st.session_state:
@@ -10,7 +12,9 @@ def init_session_state():
 
 
 def app():
+
     tab_main, tab_historic = st.tabs(['Main', 'Historic'])
+
     
     init_session_state()
 
@@ -25,10 +29,10 @@ def app():
 
 
     with tab_main : 
+
         start_window()
     
-        
-        
+
         if investigator.explore:
             col_info, col_diag = st.columns(2)
 
@@ -46,6 +50,8 @@ def app():
                     if st.button("Ask next question"):
                         result = st.session_state.dialogue_manager.process_interaction()
                         st.rerun()
+                
+                st.write(investigator.diagnose())
 
                     
             # Diagnosis probability chart
@@ -60,50 +66,42 @@ def app():
 
 
         else:
-            disorder, symptoms = investigator.diagnose()
-            symptoms = list(symptoms)
+            disorder, symptoms =  investigator.diagnose()
+            symptoms = list(set(list(symptoms)))
 
-            with st.form(disorder):
-                st.write(disorder)
+            st.session_state.setdefault("step", 1)
+            st.session_state.setdefault("diag_result", '')
 
-                symptoms_checkboxes = []
-                for s in range(len(symptoms)) :
-                    symptoms_checkboxes.append(st.checkbox(symptoms[s], key = f'{symptoms} {s}'))
-                
-                submitted = st.form_submit_button("Submit", key = disorder)
-                
-                if not submitted:
-                    st.stop()
-            
-            symptoms_bool = symptoms_checkboxes.copy()
-
-
-            if sum(symptoms_bool) >= investigator.min_symptoms :  
-
+            # Étape 1
+            if st.session_state.step == 1:
+                with st.form(disorder):
+                    st.write(disorder)
+                    c = [st.checkbox(s, key = f'{disorder} {s} {st.session_state.step}') for s in symptoms]
+                    submit1 = st.form_submit_button("submit 1", key = f'submit 1 {disorder}')
+                    if submit1 :
+                        if len(symptoms) >= investigator.min_symptoms : 
+                            st.session_state.enough1 = sum(c) >= investigator.min_symptoms
+                        else : 
+                            st.session_state.enough1 = 1
+                        st.session_state.step = 2
 
 
-                # with st.container():
-                st.write('Validation criteria')
-                
-                criteria_bool = [1 for _ in criteria_list]
+            # Étape 2 ou message selon résultat
+            elif st.session_state.step == 2:
+                if st.session_state.enough1:
+                    with st.form(f"criteria {disorder}"):
+                        d = [st.checkbox(c, key = f'{disorder} {c} {st.session_state.step}') for c in criteria_list]
+                        if st.form_submit_button("submit 2", key = f'submit 2 {disorder}'):
+                            st.session_state.result = "success" if sum(d) == len(d) else "fail"
+                            st.session_state.step = 3
 
-                # for s in range(len(criteria_list)) :
-                #     criteria_bool[s] = st.checkbox(criteria_list[s], key = f'validation {disorder} {s}')
-
-                validate = st.button('Submit', key = f'button validation {disorder}')
-                
-                if not validate : 
-                    st.stop()
-
-                st.write(sum(criteria_bool), len(criteria_bool))
-                if sum(criteria_bool) == len(criteria_bool) : 
-                    investigator.update_disease(disorder, 1)
-                    st.write('YAY you are sick')
-
-                else :
-                    investigator.update_disease(disorder, 0)
+            # Résultat final
+            elif st.session_state.step == 3:
+                if st.session_state.result == "success" :
+                    
+                    st.success(f"✅ Patient has {disorder}") 
         
-            else : 
+            if st.session_state.diag_result != "success": 
                 investigator.update_disease(disorder, 0)
 
     with tab_historic : 

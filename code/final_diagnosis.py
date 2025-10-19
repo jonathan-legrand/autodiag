@@ -11,3 +11,4 @@ disorders_list = pd.read_csv(disorders_path)
 
 def initial_disorder() :
     return({disorder : -1 for disorder in disorders_list})
+
