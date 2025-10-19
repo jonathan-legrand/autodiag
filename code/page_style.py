@@ -29,7 +29,7 @@ init_style = """
 def start_window() : 
     st.markdown(init_style,unsafe_allow_html=True)
     st.markdown(
-    "<h1 style='color:#F28E2B; font-weight:800;'>Artificial Diagnosis</h1>",
+    "<h1 style='color:#7DBDFF; font-weight:800;'>Artificial Diagnosis</h1>",
     unsafe_allow_html=True
 )
 
@@ -113,6 +113,16 @@ def plot_diagnosis(diagnosis_proba):
 
 colors_chat = {'clinician' : 'blue', 'patient' : 'red'}  # gris clair / bleu clair
 
+
+def define_color_sidebar() : 
+    st.markdown("""
+<style>
+    [data-testid=stSidebar] {
+        background-color: #fdfeffff;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 def typewriter(text: str, speed: int):
     tokens = text.split()
     container = st.empty()
@@ -120,4 +130,5 @@ def typewriter(text: str, speed: int):
         curr_full_text = " ".join(tokens[:index])
         container.markdown(curr_full_text)
         time.sleep(1 / speed)
+
 
