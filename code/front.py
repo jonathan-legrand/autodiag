@@ -41,7 +41,7 @@ def app():
             show_recap(patient_info, summary, n = investigator.iteration_counter)
 
             # Question container
-            with st.container(border=True):
+            with st.container():
                 st.markdown('**Suggested question:**')
                 st.markdown(investigator.suggested_question)
 
@@ -149,7 +149,9 @@ def app():
                     else :
                         st.write(f"*{element['content']}*")
 
-    
-            
-if __name__ == "__main__":
-    app()
+
+if st.session_state.logged_in :        
+    if __name__ == "__main__":
+        app()
+else : 
+    login_page()

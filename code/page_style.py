@@ -48,7 +48,7 @@ def login_page() :
 
     
 
-criteria_list = ['Have these symptoms occured for longer than 2 weeks?', 'Do these symptoms have an impact on the patient daily life?', 'Do these symptoms cause significant suffering?', 'Differential diagnosis: the symtpoms are not explained by other conditions']
+criteria_list = ['Have these symptoms occured for longer than 2 weeks?', 'Do these symptoms have an impact on the patient daily life?', 'Do these symptoms cause significant suffering?', 'Differential diagnosis: the symptoms are not explained by other conditions']
 
 init_style = """
     <style>  
@@ -107,7 +107,7 @@ def show_recap(patient_info, summary, n = 0) :
     if n > 0 : 
 
         # Interview report container
-        with st.container(border=True):
+        with st.container():
             st.markdown('**Interview report**')
             for recap in summary:
                 st.markdown(f'- {recap}')
@@ -119,43 +119,71 @@ colors_plot = ["#F8C8DC", "#A8DADC", "#CFFFE5", "#FFF3B0", "#DCC6E0"]
 def plot_diagnosis(diagnosis_proba):
     """
     Affiche un bar chart horizontal des scores de diagnostic dans Streamlit,
-    avec des couleurs personnalisées.
+    avec des couleurs personnalisées et étiquettes sous chaque barre.
 
     Args:
         diagnosis_proba (pd.DataFrame): DataFrame contenant les colonnes 'score' et 'disorder'.
-                                        Une colonne 'color' est générée automatiquement.
     """
-
     diagnosis_proba = diagnosis_proba[:5]
 
     # Liste de couleurs personnalisées (autant que de lignes dans le DataFrame)
     custom_colors = ["#F8C8DC", "#A8DADC", "#CFFFE5", "#FFF3B0", "#DCC6E0"]
 
-    # Créer le bar chart
-    fig = px.bar(
-        diagnosis_proba,
-        x='score',
-        y='disorder',
-        orientation='h',
-        color='disorder',
-        color_discrete_sequence=custom_colors,
-        height=500,
-        range_x = [0,1.05]
-        # text = diagnosis_proba['disorder']
+    # On crée la figure avec Plotly Express
+    fig_px = px.bar(
+    diagnosis_proba,
+    x='score',
+    y='disorder',
+    orientation='h',
+    color='disorder',
+    color_discrete_sequence=custom_colors,
+    range_x=[0, 1.05],
+    height=500,
     )
+
+    # Crée une figure vide
+    fig = go.Figure()
+
+    # Ajoute toutes les traces de fig_px à la nouvelle figure fig
+    for trace in fig_px.data:
+        fig.add_trace(trace)
+
+    # Copie aussi la mise en page
+    fig.update_layout(fig_px.layout)
+    fig.update_yaxes(showticklabels=False)
+
     # Retirer la légende
-    fig.update_layout(showlegend=False, 
-    xaxis = dict(
-        tickmode = 'array',
-        tickvals = [0,0.25,0.5,0.75,1],
+    fig.update_layout(showlegend=False)
+
+    # Ajuster ticks de l'axe X
+    fig.update_layout(
+        xaxis=dict(
+            tickmode='array',
+            tickvals=[0, 0.25, 0.5, 0.75, 1],
+        ),
+        yaxis=dict(
+            title ='',
+        ),
+        margin=dict(l=140, r=20, t=20, b=80)  # marge basse plus grande pour texte sous barres
     )
-)
+
     fig.update_traces(width=0.3)
-    # fig.update_yaxes(visible=False)
+
+    # Ajouter annotations (étiquettes sous chaque barre)
+    for i, row in diagnosis_proba.iterrows():
+        fig.add_annotation(
+            x=0,  # position au milieu de la barre horizontalement
+            y=row['disorder'],
+            text=f"<b>{row['disorder']}</b>",  # texte = score avec 2 décimales
+            showarrow=False,
+            yshift=-30,  # décalage vers le bas (sous la barre)
+            font=dict(size=14, color="grey"),
+            align='left',
+            xanchor='left',
+        )
 
     # Afficher le graphique dans Streamlit
-    st.plotly_chart(fig)
-
+    st.plotly_chart(fig, use_container_width=True)
 
 
 
