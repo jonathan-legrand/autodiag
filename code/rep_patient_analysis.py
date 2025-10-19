@@ -37,9 +37,10 @@ def reformulate_patient_response(rep_patient:str):
     Extract and list the symptoms mentioned in the following patient response. 
     Describe the symptoms in a few sentences, in terms related to mental health.
     Reformulated multiple times the description of each symptoms
-    if no symptoms are mentioned, respond with 'no symptoms'.
+    if no symptoms are mentioned, respond with 'nothing to declare'.
     Return the symptoms description as comma separated list of long descriptions.
     do not mention anything other than these descriptions.
+    Include only positive findings; omit any negated or absent ones.
     Patient Response: "{rep_patient}"
     """
     response = call_api([{"role": "user", "content": prompt}], role="patient")
@@ -60,8 +61,10 @@ def distance_rep_patient(rep_patient:str, preprocess=True):
     distance = rep_embedding @ criteria_embedding.T
 
     # keep on
-    thr = np.max((np.percentile(distance, 90), 0.7))
-    distance = np.where(distance >= thr, distance, 0)
+    thr = np.min((np.percentile(distance, 99.9), 0.99))
+    distance = np.where(distance >= thr, 1, 0)
+    # extract only max value
+    # distance = np.where(distance == np.max(distance), 1, 0)
 
     patient_frame = symptoms_embeds[['symptome']].copy()
 

@@ -66,19 +66,19 @@ class Investigator:
 
     def update_patient_representation(self, new_scores):
         self.long_scores["score"] += new_scores["score"]
+        self.long_scores["scores"] = np.where(
+            self.long_scores["score"] >= 1, 1, self.long_scores["score"])
 
         # first proxy: n cycles
         if self.iteration_counter > self.n_switch_cycles:
             self.explore = False
 
     def most_important(self): 
-        print(f"WARNING: most_important defines the top 1 disease based on single max criterion, not averaged scores")
         # TODO use same func in most_important and compute_score_distribution
         # TO DO need to check that most important disease was not already investigated as false 
-        
-        most_important_disease = self.long_scores.sort_values(
+        most_important_disease = self.long_scores.groupby("disorder").mean(numeric_only=True).reset_index().sort_values(
                 by="score", ascending=False
-            ).reset_index(drop=True).loc[0, "disorder"]
+            ).iloc[0]["disorder"]
         most_important_symptoms = self.long_data[self.long_scores.disorder == most_important_disease].symptome
 
         return most_important_disease, most_important_symptoms
@@ -124,7 +124,7 @@ class Investigator:
         return [system_msg] + history_msgs + [instruction_msg]
 
     def compute_score_distribution(self):
-        sum_scores = self.long_scores.groupby("disorder").max(numeric_only=True).reset_index()
+        sum_scores = self.long_scores.groupby("disorder").mean(numeric_only=True).reset_index()
         sum_scores.sort_values(by="score", ascending=False, inplace=True)
         sum_scores["score"] = sum_scores["score"] / self.iteration_counter
         print(f"top disorder in the score distribution: {sum_scores.iloc[0]['disorder']} with score {sum_scores.iloc[0]['score']}")
