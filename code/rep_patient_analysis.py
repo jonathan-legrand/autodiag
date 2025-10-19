@@ -53,7 +53,7 @@ def distance_rep_patient(rep_patient:str, preprocess=True):
     distance = rep_embedding @ criteria_embedding.T
 
     # keep on
-    thr = np.max((np.percentile(distance, 99), 0.8))
+    thr = np.max((np.percentile(distance, 99), 0.5))
     distance = np.where(distance >= thr, distance, 0)
 
     patient_frame = symptoms_embeds[['symptome']].copy()
