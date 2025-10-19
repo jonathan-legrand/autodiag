@@ -28,7 +28,7 @@ class Investigator:
         # init random patient from llm_patients db
         from patients.patient import get_random_patient, get_patient_from_disorder
         # labels, patient = get_random_patient()
-        labels, patient = get_patient_from_disorder("borderline")
+        labels, patient = get_patient_from_disorder("schizophrenia")
         print("Selected patient with disorders:", labels)
         self.patient_metadata = patient
         self.actual_diagnoses = labels
@@ -66,7 +66,7 @@ class Investigator:
 
     def update_patient_representation(self, new_scores):
         self.long_scores["score"] += new_scores["score"]
-        self.long_scores["scores"] = np.where(
+        self.long_scores["score"] = np.where(
             self.long_scores["score"] >= 1, 1, self.long_scores["score"])
 
         # first proxy: n cycles
@@ -97,6 +97,7 @@ class Investigator:
                 "Continue the conversation with the patient to explore their symptoms. "
                 f"Focus on gathering information about the patient's symptoms. "
                 "Ask concise and relevant questions to better understand the patient's condition."
+                "Show empathy and try to adapt your question the patient's symptoms"
             )
         else:
             prompt_text = (
