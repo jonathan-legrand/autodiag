@@ -31,6 +31,7 @@ def app():
     with tab_main : 
 
         start_window()
+
     
 
         if investigator.explore:
@@ -95,14 +96,20 @@ def app():
                             st.session_state.result = "success" if sum(d) == len(d) else "fail"
                             st.session_state.step = 3
 
+            
             # Résultat final
             elif st.session_state.step == 3:
                 if st.session_state.result == "success" :
                     
                     st.success(f"✅ Patient has {disorder}") 
         
-            if st.session_state.diag_result != "success": 
-                investigator.update_disease(disorder, 0)
+                else: 
+                    st.write(f'{disorder} was not confirmed by diagnosis')
+
+        with st.sidebar : 
+            st.write(f'Simultated disease: {investigator.actual_diagnoses}')
+            if investigator.iteration_counter > 0 : 
+                st.write(f'Simulated patient answer: {investigator.patient_response}')
 
     with tab_historic : 
         st.write(investigator.conversation_history)

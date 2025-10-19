@@ -6,7 +6,6 @@ from pathlib import Path
 
 from functools import reduce
 
-from final_diagnosis import initial_disorder
 
 def concat_sentences(x, y):
     return x + ". " + y
@@ -24,7 +23,7 @@ class Investigator:
 
         }
 
-        self.verified_disorders = initial_disorder()
+        
 
 
         # init random patient from llm_patients db
@@ -54,6 +53,10 @@ class Investigator:
     @property
     def suggested_question(self):
         return self.conversation_history[-1]["content"]
+    
+    @property
+    def patient_response(self) : 
+        return self.conversation_history[-2]["content"]
 
     def update_conversation_history(self, message: str, role: str):
         self.conversation_history.append({"role": role, "content": message})
@@ -70,9 +73,8 @@ class Investigator:
         print(f"WARNING: most_important defines the top 1 disease based on single max criterion, not averaged scores")
         # TODO use same func in most_important and compute_score_distribution
         # TO DO need to check that most important disease was not already investigated as false 
-        verified_diseases = self.verified_disorders
-        bad_diseases = [disease for disease in verified_diseases if verified_diseases[disease] == 0]
-        most_important_disease = self.long_scores[~self.long_scores.disorder.isin(bad_diseases)].sort_values(
+        
+        most_important_disease = self.long_scores.sort_values(
                 by="score", ascending=False
             ).reset_index(drop=True).loc[0, "disorder"]
         most_important_symptoms = self.long_data[self.long_scores.disorder == most_important_disease].symptome
