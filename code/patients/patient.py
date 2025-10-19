@@ -19,6 +19,21 @@ def get_random_patient():
     demographics = {key: patient_data[key] for key in llm_patients.columns if key != "Medical Conditions"}
     return labels, demographics
 
+def get_patient_from_index(index: int):
+    patient_data = llm_patients.iloc[index,:]
+    labels = patient_data["Medical Conditions"].split(", ")
+    demographics = {key: patient_data[key] for key in llm_patients.columns if key != "Medical Conditions"}
+    return labels, demographics
+
+def get_patient_from_disorder(disorder: str):
+    filtered_patients = llm_patients[llm_patients["Medical Conditions"].str.contains(disorder, na=False)]
+    if len(filtered_patients) == 0:
+        raise ValueError(f"No patients found with disorder: {disorder}")
+    random_idx = np.random.randint(0, len(filtered_patients))
+    patient_data = filtered_patients.iloc[random_idx,:]
+    labels = patient_data["Medical Conditions"].split(", ")
+    demographics = {key: patient_data[key] for key in llm_patients.columns if key != "Medical Conditions"}
+    return labels, demographics
 
 
 if __name__ == "__main__":
