@@ -2,7 +2,7 @@
 # %%
 import pickle
 from investigator import Investigator
-from rep_patient_analysis import distance_rep_patient
+from rep_patient_analysis import distance_rep_patient, reformulate_patient_response
 from llm_query import call_api
 
 symptoms_func = distance_rep_patient
@@ -56,7 +56,9 @@ class DialogueManager:
         response = ask_patient(self.question, self.investigator.conversation_history, self.investigator.patient_metadata)
         self.investigator.update_conversation_history(response, role="patient")
         
-        symptoms_score = symptoms_func(response)
+        reformulated_response = reformulate_patient_response(response)
+        print("Reformulated response:", reformulated_response)
+        symptoms_score = symptoms_func(reformulated_response)
         self.investigator.update_patient_representation(symptoms_score)
         
         instruction = self.investigator.generate_instruction()

@@ -9,6 +9,7 @@ from pathlib import Path
 import os
 from text_preprocessing import preprocess_sentence
 from dotenv import load_dotenv
+from llm_query import call_api
 load_dotenv()
 base_url = os.getenv("LMSTUDIO_BASE_URL")
 MODEL = os.getenv("LMSTUDIO_MODEL")
@@ -31,6 +32,16 @@ if not symptoms_embeddings_path.is_absolute():
 with open(symptoms_embeddings_path, 'rb') as fp:
         symptoms_embeds = pickle.load(fp)
 
+def reformulate_patient_response(rep_patient:str):
+    prompt = f"""
+    Extract and list the symptoms mentioned in the following patient response. 
+    Provide the symptoms as a comma-separated list.
+
+    Patient Response: "{rep_patient}"
+    Symptoms:
+    """
+    response = call_api([{"role": "user", "content": prompt}], role="patient")
+    return response
 
 def distance_rep_patient(rep_patient:str, preprocess=True):
     if preprocess:
@@ -39,7 +50,11 @@ def distance_rep_patient(rep_patient:str, preprocess=True):
 
     criteria_embedding = np.stack(symptoms_embeds['embedding'])
 
-    distance = rep_embedding@criteria_embedding.T
+    distance = rep_embedding @ criteria_embedding.T
+
+    # keep on
+    thr = np.percentile(distance, 90)
+    distance = np.where(distance >= thr, distance, 0)
 
     patient_frame = symptoms_embeds[['symptome']].copy()
 
@@ -47,4 +62,4 @@ def distance_rep_patient(rep_patient:str, preprocess=True):
 
     patient_frame['score'] = distance
 
-    return patient_frame 
+    return patient_frame
