@@ -1,9 +1,9 @@
 import streamlit as st
 from main import DialogueManager
 import pandas as pd
-from page_style import start_window, show_recap, plot_diagnosis, criteria_list, colors_chat, typewriter, define_color_sidebar
+from page_style import start_window, show_recap, plot_diagnosis, criteria_list, colors_chat, typewriter, define_color_sidebar, login_page
 
-
+st.session_state.setdefault("logged_in", False)
 
 # Initialize session state
 def init_session_state():
@@ -106,6 +106,35 @@ def app():
             else: 
                 st.error(f'**{disorder}** was not confirmed by diagnosis]')
 
+
+            with st.container(border = False) :
+                st.markdown('<div style="text-align: center;font-size: 40px"><b>Report</b></div>', unsafe_allow_html=True)
+                if len(investigator.clinical_report) > 0 :
+                    summary = investigator.clinical_report[-1]
+                else : 
+                    summary = ''
+                show_recap(patient_info, summary, n = investigator.iteration_counter)
+            
+            # Créer deux boutons côte à côte avec columns
+            
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # Conteneur pour aligner le bouton à gauche
+                st.markdown('<div style="text-align: left;">', unsafe_allow_html=True)
+                if st.button("Download PDF"):
+                    st.success("Let's pretend a pdf is downloaded")
+                st.markdown('</div>', unsafe_allow_html=True)
+
+
+            with col2:
+                # Conteneur pour aligner le bouton à droite
+                st.markdown('<div style="text-align: right;">', unsafe_allow_html=True)
+                if st.button("Close the session"):
+                    st.warning("closing session...")
+                    st.session_state.logged_in = False
+                st.markdown('</div>', unsafe_allow_html=True)
+
     with st.sidebar : 
         define_color_sidebar()
         st.markdown(':red[**Simulation**]')
@@ -121,7 +150,8 @@ def app():
                     else :
                         st.write(f"*{element['content']}*")
             
-
-
-if __name__ == "__main__":
-    app()
+if st.session_state["logged_in"] : 
+    if __name__ == "__main__":
+        app()
+else :
+    login_page()

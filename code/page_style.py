@@ -9,7 +9,39 @@ import plotly.graph_objects as go
 
 import time
 
-criteria_list = ['Do these symptoms last longer than 2 weeks?', 'Do these symptoms have an impact on private and professional life?', 'Do these symptoms cause significant suffering?']
+logo_path = Path('../data/logo-diagnostic-artificiel-5.png')
+
+if not logo_path.is_absolute():
+    # resolve relative to the repository/code file location (works on Windows)
+    logo_path = (Path(__file__).resolve().parent / logo_path).resolve()
+
+def login_page() : 
+
+
+    USERS = {
+        "sophie": "monmotdepasse",
+        "admin": "admin123"
+    }
+    
+    st.columns(3)[1].image(logo_path, width = 800)
+
+    username = st.columns(5)[2].text_input("email")
+    password = st.columns(5)[2].text_input("password", type="password")
+
+    
+    if st.columns(5)[2].button("log in", key="button1", type = "primary"):
+
+        if username in USERS and USERS[username] == password:
+            st.success(f"Welcome {username} !")
+            time.sleep(1.5)
+            st.session_state["logged_in"] = True
+            st.session_state["username"] = username
+        else:
+            st.error("Wrong user name or password.")
+
+    
+
+criteria_list = ['Have these symptoms occured for longer than 2 weeks?', 'Do these symptoms have an impact on the patient daily life?', 'Do these symptoms cause significant suffering?', 'Differential diagnosis: the symtpoms are not explained by other conditions']
 
 init_style = """
     <style>  
@@ -30,7 +62,7 @@ init_style = """
 def start_window() : 
     st.markdown(init_style,unsafe_allow_html=True)
     st.markdown(
-    "<h1 style='color:#7DBDFF; font-weight:800;'>Artificial Diagnosis</h1>",
+    "<h1 style='color:#7DBDFF; font-weight:800;'>Diagnostic Artificiel</h1>",
     unsafe_allow_html=True
 )
 
