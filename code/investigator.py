@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from llm_query import call_summarizer
 
 from functools import reduce
 
@@ -50,9 +51,29 @@ class Investigator:
         self.conversation_history = []
         self.conversation_summary = []
         self.system_conversation_history = []
+        self.raw_clinical_report = []
         self.clinical_report = []
 
+    def update_clinical_report(self):
 
+        # TODO Add examples
+        system_msg = {
+            "role": "system",
+            "content": """
+            You are a summarizer for a psychiatry assistant app. You take as an input a list 
+            of symptoms of arbitrary size and you output a short list of less than five comma
+            separated sentences.
+            Don't invent symptoms, keep sentences short and factual.
+            The patient should the subject of the sentence.
+            For instance : `The patient has trouble sleeping`
+            """
+        }
+        flat_string = " ".join(word.strip() for sublist in self.raw_clinical_report for word in sublist)
+        instruction_msg = {"role": "user", "content": flat_string}
+        message = [system_msg, instruction_msg]
+        response = call_summarizer(message)
+        sentences = [s.strip() for s in response.split(".") if s.strip()]
+        self.clinical_report = sentences
 
     @property
     def suggested_question(self):

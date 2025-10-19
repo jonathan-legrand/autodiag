@@ -22,6 +22,15 @@ client = OpenAI(
     base_url=base_url,
 )
 
+def call_summarizer(message: list) -> dict:
+    response = client.chat.completions.create(
+        model=model,
+            messages=message
+    )
+    formatted_response = response.choices[0].message.content 
+    return formatted_response
+
+
 def call_api(prompt: list, role:str) -> dict:
     message = []
     for msg in prompt:

@@ -34,7 +34,7 @@ def app():
         with col_info:
 
             if len(investigator.clinical_report) > 0 :
-                summary = investigator.clinical_report[-1]
+                summary = investigator.clinical_report
             else : 
                 summary = ''
 
@@ -109,7 +109,7 @@ def app():
             with st.container(border = False) :
                 st.markdown('<div style="text-align: center;font-size: 40px"><b>Report</b></div>', unsafe_allow_html=True)
                 if len(investigator.clinical_report) > 0 :
-                    summary = investigator.clinical_report[-1]
+                    summary = investigator.clinical_report
                 else : 
                     summary = ''
                 show_recap(patient_info, summary, n = investigator.iteration_counter)
@@ -151,8 +151,5 @@ def app():
 
     
             
-if st.session_state["logged_in"] : 
-    if __name__ == "__main__":
-        app()
-else :
-    login_page()
+if __name__ == "__main__":
+    app()

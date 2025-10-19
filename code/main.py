@@ -59,7 +59,8 @@ class DialogueManager:
         
         reformulated_response, contains_symptoms = reformulate_patient_response(response)
         if contains_symptoms:
-            self.investigator.clinical_report.append(reformulated_response)
+            self.investigator.raw_clinical_report.append(reformulated_response)
+            self.investigator.update_clinical_report()
 
         print("Reformulated response:", reformulated_response)
         for symptom in reformulated_response:
