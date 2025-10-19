@@ -13,8 +13,6 @@ def init_session_state():
 
 def app():
 
-    tab_main, tab_historic = st.tabs(['Main', 'Historic'])
-
     
     init_session_state()
 
@@ -103,7 +101,7 @@ def app():
                 st.success(f"✅ Patient has {disorder}") 
     
             else: 
-                st.write(f'{disorder} was not confirmed by diagnosis')
+                st.write(f':red[**{disorder}** was not confirmed by diagnosis]')
 
     with st.sidebar : 
         st.markdown(':red[**Simulation**]')
@@ -113,17 +111,12 @@ def app():
                 with st.container() : 
                     st.markdown(f':{colors_chat[element["role"]]}[**{element["role"]}**]')
                 with st.container(border = True) : 
-                    if e >= len(investigator.conversation_history) - 2 : 
+                    if e >= len(investigator.conversation_history) - 2 and investigator.explore : 
                         speed = 5
                         typewriter(text=element['content'], speed=speed)
                     else :
                         st.write(element['content'])
-                
-
-
-
-
-
+            
 
 
 if __name__ == "__main__":

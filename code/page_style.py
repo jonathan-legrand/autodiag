@@ -30,7 +30,11 @@ def start_window() :
     st.markdown(init_style,unsafe_allow_html=True)
     st.title("Artificial Diagnosis")
 
-image_url = "https://via.placeholder.com/100"
+image_path = Path('../data/Icone_patient.png')
+
+if not image_path.is_absolute():
+    # resolve relative to the repository/code file location (works on Windows)
+    image_path = (Path(__file__).resolve().parent / image_path).resolve()
 
 def write_info(df) : 
     lines = []
@@ -45,7 +49,7 @@ def show_recap(patient_info, summary) :
     with st.container(border=False):
         col_img, col_info_text = st.columns([1, 3])
         with col_img:
-            st.image(image_url, width=100)
+            st.image(image_path, width=100)
         with col_info_text:
             lines = write_info(patient_info)
             
@@ -87,10 +91,16 @@ def plot_diagnosis(diagnosis_proba):
         orientation='h',
         color='disorder',
         color_discrete_sequence=custom_colors,
-        height=500
+        height=500,
+        range_x = [0,1.05]
     )
     # Retirer la légende
-    fig.update_layout(showlegend=False)
+    fig.update_layout(showlegend=False, 
+    xaxis = dict(
+        tickmode = 'array',
+        tickvals = [0,0.25,0.5,0.75,1],
+    )
+)
 
     # Afficher le graphique dans Streamlit
     st.plotly_chart(fig)
