@@ -38,5 +38,5 @@ def call_api(prompt: list, role:str) -> dict:
         )
         formatted_response = response.choices[0].message.content 
     else:
-        formatted_response = "I have been feeling very anxious lately"
+        formatted_response = "I'm here because I've been experiencing manic or hypomanic episodes. It's been a bit challenging managing them, and I thought it would be good to discuss with someone."
     return formatted_response 
