@@ -15,6 +15,13 @@ if not logo_path.is_absolute():
     # resolve relative to the repository/code file location (works on Windows)
     logo_path = (Path(__file__).resolve().parent / logo_path).resolve()
 
+logo_foot = Path('../data/logo-diagnostic-artificiel-3.png')
+
+if not logo_foot.is_absolute():
+    # resolve relative to the repository/code file location (works on Windows)
+    logo_foot = (Path(__file__).resolve().parent / logo_foot).resolve()
+
+
 def login_page() : 
 
 
@@ -60,11 +67,14 @@ init_style = """
     """
 
 def start_window() : 
-    st.markdown(init_style,unsafe_allow_html=True)
-    st.markdown(
-    "<h1 style='color:#7DBDFF; font-weight:800;'>Diagnostic Artificiel</h1>",
-    unsafe_allow_html=True
-)
+    col1, col2 = st.columns([1,2])
+    with col1 :
+        st.markdown(init_style,unsafe_allow_html=True)
+        st.markdown(
+        "<h1 style='color:#7DBDFF; font-weight:800;'>Diagnostic Artificiel</h1>",
+        unsafe_allow_html=True)
+    with col2 : 
+        footer()    
 
 image_path = Path('../data/Icone_patient.png')
 
@@ -171,3 +181,36 @@ def typewriter(text: str, speed: int):
         time.sleep(1 / speed)
 
 
+def footer() :
+    footer="""<style>
+    a:link , a:visited{
+    color: blue;
+    background-color: transparent;
+    text-decoration: underline;
+    }
+
+    a:hover,  a:active {
+    color: red;
+    background-color: transparent;
+    text-decoration: underline;
+    }
+
+    .footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    color: black;
+    text-align: center;
+    padding-bottom : 0px !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    margin-bottom: 0px ! important;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    }
+    </style>
+    """
+    st.write('')
+    st.markdown(footer,unsafe_allow_html=True)
+    st.columns(5)[3].image(f'{logo_foot}', width = 200)

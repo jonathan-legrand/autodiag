@@ -1,7 +1,7 @@
 import streamlit as st
 from main import DialogueManager
 import pandas as pd
-from page_style import start_window, show_recap, plot_diagnosis, criteria_list, colors_chat, typewriter, define_color_sidebar, login_page
+from page_style import start_window, show_recap, plot_diagnosis, criteria_list, colors_chat, typewriter, define_color_sidebar, login_page, footer
 
 st.session_state.setdefault("logged_in", False)
 
@@ -26,8 +26,7 @@ def app():
     
 
     start_window()
-
-
+    
 
     if investigator.explore:
         col_info, col_diag = st.columns(2)
@@ -149,6 +148,8 @@ def app():
                         typewriter(text=f'*{element["content"]}*', speed=speed)
                     else :
                         st.write(f"*{element['content']}*")
+
+    
             
 if st.session_state["logged_in"] : 
     if __name__ == "__main__":
