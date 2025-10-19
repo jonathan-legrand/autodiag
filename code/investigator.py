@@ -66,7 +66,9 @@ class Investigator:
         if self.iteration_counter > self.n_switch_cycles:
             self.explore = False
 
-    def most_important(self) : 
+    def most_important(self): 
+        print(f"WARNING: most_important defines the top 1 disease based on single max criterion, not averaged scores")
+        # TODO use same func in most_important and compute_score_distribution
         # TO DO need to check that most important disease was not already investigated as false 
         verified_diseases = self.verified_disorders
         bad_diseases = [disease for disease in verified_diseases if verified_diseases[disease] == 0]
@@ -80,6 +82,7 @@ class Investigator:
     def generate_instruction(self):
         most_important_disease, most_important_symptoms = self.most_important()
         
+        print("Most important disease:", most_important_disease)
         relevant_symptoms = reduce(
             concat_sentences, most_important_symptoms
         )
@@ -117,10 +120,10 @@ class Investigator:
         return [system_msg] + history_msgs + [instruction_msg]
 
     def compute_score_distribution(self):
-        sum_scores = self.long_scores.groupby("disorder").sum(numeric_only=True).reset_index()
+        sum_scores = self.long_scores.groupby("disorder").max(numeric_only=True).reset_index()
         sum_scores.sort_values(by="score", ascending=False, inplace=True)
         sum_scores["score"] = sum_scores["score"] / self.iteration_counter
-        
+        print(f"top disorder in the score distribution: {sum_scores.iloc[0]['disorder']} with score {sum_scores.iloc[0]['score']}")
         return sum_scores
     
     def diagnose(self) : 
