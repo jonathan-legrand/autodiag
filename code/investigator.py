@@ -11,17 +11,6 @@ from final_diagnosis import initial_disorder
 def concat_sentences(x, y):
     return x + ". " + y
 
-def most_important(object) : 
-    # TO DO need to check that most important disease was not already investigated as false 
-    verified_diseases = object.verified_disorders
-    bad_diseases = [disease for disease in verified_diseases if verified_diseases[disease] == 0]
-    most_important_disease = object.long_scores[~object.long_scores.disorder.isin(bad_diseases)].sort_values(
-            by="score", ascending=False
-        ).reset_index(drop=True).loc[0, "disorder"]
-    most_important_symptoms = object.long_data[object.long_scores.disorder == most_important_disease].symptome
-
-    return most_important_disease, most_important_symptoms
-
 
 class Investigator:
     def __init__(self, n_switch_cycles=5, data_path="../data/datalong.csv"):
@@ -77,8 +66,19 @@ class Investigator:
         if self.iteration_counter > self.n_switch_cycles:
             self.explore = False
 
+    def most_important(self) : 
+        # TO DO need to check that most important disease was not already investigated as false 
+        verified_diseases = self.verified_disorders
+        bad_diseases = [disease for disease in verified_diseases if verified_diseases[disease] == 0]
+        most_important_disease = self.long_scores[~self.long_scores.disorder.isin(bad_diseases)].sort_values(
+                by="score", ascending=False
+            ).reset_index(drop=True).loc[0, "disorder"]
+        most_important_symptoms = self.long_data[self.long_scores.disorder == most_important_disease].symptome
+
+        return most_important_disease, most_important_symptoms
+
     def generate_instruction(self):
-        most_important_disease, most_important_symptoms = most_important(self)
+        most_important_disease, most_important_symptoms = self.most_important()
         
         relevant_symptoms = reduce(
             concat_sentences, most_important_symptoms
@@ -124,7 +124,7 @@ class Investigator:
         return sum_scores
     
     def diagnose(self) : 
-        return most_important(self)
+        return self.most_important()
     
     def update_disease(self, disorder, success) : 
         self.verified_disorders[disorder] = success
