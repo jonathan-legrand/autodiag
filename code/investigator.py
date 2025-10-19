@@ -76,9 +76,9 @@ class Investigator:
     def most_important(self): 
         # TODO use same func in most_important and compute_score_distribution
         # TO DO need to check that most important disease was not already investigated as false 
-        most_important_disease = self.long_scores.sort_values(
+        most_important_disease = self.long_scores.groupby("disorder").mean(numeric_only=True).reset_index().sort_values(
                 by="score", ascending=False
-            ).groupby("disorder").mean(numeric_only=True).reset_index().loc[0, "disorder"]
+            ).iloc[0]["disorder"]
         most_important_symptoms = self.long_data[self.long_scores.disorder == most_important_disease].symptome
 
         return most_important_disease, most_important_symptoms
