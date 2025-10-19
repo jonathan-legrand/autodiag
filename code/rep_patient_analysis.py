@@ -40,6 +40,7 @@ def reformulate_patient_response(rep_patient:str):
     if no symptoms are mentioned, respond with 'nothing to declare'.
     Return the symptoms description as comma separated list of long descriptions.
     do not mention anything other than these descriptions.
+    Include only positive findings; omit any negated or absent ones.
     Patient Response: "{rep_patient}"
     """
     response = call_api([{"role": "user", "content": prompt}], role="patient")
@@ -50,7 +51,7 @@ def reformulate_patient_response(rep_patient:str):
     response = response.split(",")
     return response, contains_symptoms
 
-def distance_rep_patient(rep_patient:str, preprocess=True):
+def distance_rep_patient(rep_patient:str, preprocess=False):
     if preprocess:
         rep_patient = preprocess_sentence(rep_patient) 
     rep_embedding  = get_embedding(rep_patient)
