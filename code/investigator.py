@@ -3,12 +3,13 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from llm_query import call_summarizer
 
 from functools import reduce
 
+
 def concat_sentences(x, y):
     return x + ". " + y
-
 
 class Investigator:
     def __init__(self, n_switch_cycles=5, data_path="../data/datalong.csv"):
@@ -17,7 +18,21 @@ class Investigator:
         self.iteration_counter = 0
         self.explore = True
         self.current_question = None
+        self.min_symptoms = 3
+        self.patient_metadata = {
 
+        }
+        
+
+
+        # init random patient from llm_patients db
+        from patients.patient import get_random_patient, get_patient_from_disorder
+        # labels, patient = get_random_patient()
+        labels, patient = get_patient_from_disorder("schizophrenia")
+        print("Selected patient with disorders:", labels)
+        self.patient_metadata = patient
+        self.actual_diagnoses = labels
+        
         # make data_path pathlib-friendly and resolve relative to this file
         data_path = Path(data_path)
         if not data_path.is_absolute():
@@ -26,6 +41,8 @@ class Investigator:
 
 
         long_data = pd.read_csv(data_path, index_col=0)
+        mask = (long_data.disorder != "Somatic Symptom Disorder") # Oddly defined disorder
+        long_data = long_data[mask]
         long_scores = long_data.copy()
         long_scores["score"] = np.zeros(shape=(len(long_data)))
         self.long_scores = long_scores
@@ -34,29 +51,64 @@ class Investigator:
         self.conversation_history = []
         self.conversation_summary = []
         self.system_conversation_history = []
+        self.raw_clinical_report = []
+        self.clinical_report = []
 
+    def update_clinical_report(self):
+
+        # TODO Add examples
+        system_msg = {
+            "role": "system",
+            "content": """
+            You are a summarizer for a psychiatry assistant app. You take as an input a list 
+            of symptoms of arbitrary size and you output a short list of less than five comma
+            separated sentences.
+            Don't invent symptoms, keep sentences short and factual.
+            The patient should the subject of the sentence.
+            For instance : `The patient has trouble sleeping`
+            """
+        }
+        flat_string = " ".join(word.strip() for sublist in self.raw_clinical_report for word in sublist)
+        instruction_msg = {"role": "user", "content": flat_string}
+        message = [system_msg, instruction_msg]
+        response = call_summarizer(message)
+        sentences = [s.strip() for s in response.split(".") if s.strip()]
+        self.clinical_report = sentences
 
     @property
     def suggested_question(self):
         return self.conversation_history[-1]["content"]
+    
+    @property
+    def patient_response(self) : 
+        return self.conversation_history[-2]["content"]
 
     def update_conversation_history(self, message: str, role: str):
         self.conversation_history.append({"role": role, "content": message})
 
     def update_patient_representation(self, new_scores):
         self.long_scores["score"] += new_scores["score"]
-        self.iteration_counter += 1
+        #self.long_scores["score"] = np.where(
+        #    self.long_scores["score"] >= 1, 1, self.long_scores["score"])
 
         # first proxy: n cycles
         if self.iteration_counter > self.n_switch_cycles:
             self.explore = False
 
-    def generate_instruction(self):
-        most_important_disease = self.long_scores.sort_values(
-            by="score", ascending=False
-        ).reset_index(drop=True).loc[0, "disorder"]
+    def most_important(self): 
+        # TODO use same func in most_important and compute_score_distribution
+        # TO DO need to check that most important disease was not already investigated as false 
+        most_important_disease = self.long_scores.groupby("disorder").max(numeric_only=True).reset_index().sort_values(
+                by="score", ascending=False
+            ).iloc[0]["disorder"]
         most_important_symptoms = self.long_data[self.long_scores.disorder == most_important_disease].symptome
 
+        return most_important_disease, most_important_symptoms
+
+    def generate_instruction(self):
+        most_important_disease, most_important_symptoms = self.most_important()
+        
+        print("Most important disease:", most_important_disease)
         relevant_symptoms = reduce(
             concat_sentences, most_important_symptoms
         )
@@ -65,8 +117,9 @@ class Investigator:
         if self.explore:
             prompt_text = (
                 "Continue the conversation with the patient to explore their symptoms. "
-                f"Focus on gathering information about the patient's symptoms. "
+                f"Focus on gathering information about the patient's symptoms."
                 "Ask concise and relevant questions to better understand the patient's condition."
+                "Show empathy and try to adapt your question the patient's symptoms"
             )
         else:
             prompt_text = (
@@ -94,11 +147,23 @@ class Investigator:
         return [system_msg] + history_msgs + [instruction_msg]
 
     def compute_score_distribution(self):
-        sum_scores = self.long_scores.groupby("disorder").sum(numeric_only=True).reset_index()
+        sum_scores = self.long_scores.groupby("disorder").max(numeric_only=True).reset_index()
         sum_scores.sort_values(by="score", ascending=False, inplace=True)
-        sum_scores["score"] = sum_scores["score"] / self.iteration_counter
-        
+        #sum_scores["score"] = sum_scores["score"] / self.iteration_counter
+        sum_scores["score"] = sum_scores["score"] / sum_scores["score"].max()
+        print(f"top disorder in the score distribution: {sum_scores.iloc[0]['disorder']} with score {sum_scores.iloc[0]['score']}")
         return sum_scores
+    
+    def diagnose(self) : 
+        return self.most_important()
+    
+    def update_disease(self, disorder, success) : 
+        self.verified_disorders[disorder] = success
+        
+
+        
+        
+
 
 # %%
 #investigator = Investigator()

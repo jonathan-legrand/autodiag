@@ -2,22 +2,38 @@
 # %%
 import pickle
 from investigator import Investigator
-from rep_patient_analysis import distance_rep_patient
+from rep_patient_analysis import distance_rep_patient, reformulate_patient_response
 from llm_query import call_api
+import numpy as np
 
 symptoms_func = distance_rep_patient
 
-def ask_patient(question, conv_history: list[dict]) -> dict:
+def ask_patient(question, conv_history, demographics: list[dict]) -> dict:
     disorder = "Dissociative Identity Disorder"
     code = "F44.81"
+    # system_msg = [
+    #     {
+    #         "role": "system",
+    #         "content": f"""
+    #         You are a patient being interviewed by a mental health medical investigator.
+    #         You must simulate the symptoms of {disorder}, as classified by ICD-10 code {code}.
+    #         Answer the investigator's questions in a way that reflects the experiences and challenges associated with {disorder}.
+    #         Do not acknowledge symptoms that are not related to your disorder.
+    #         """
+    #         }
+    #         ]
     system_msg = [
         {
             "role": "system",
             "content": f"""
             You are a patient being interviewed by a mental health medical investigator.
-            You must simulate the symptoms of {disorder}, as classified by ICD-10 code {code}.
-            Answer the investigator's questions in a way that reflects the experiences and challenges associated with {disorder}.
-            Do not acknowledge symptoms that are not related to your disorder.
+            Your traits are:
+            {demographics}
+            Answer the investigator's questions in a way that is congruent with these traits.
+            Do not acknowledge symptoms that may not related to your potential disorder.
+            Do not acknowledge any potential disorder diagnosis.
+            Do not reveal any information about your disorder unless directly asked about related symptoms.
+            Do not agree to every question, be realistic and nuanced in your answers.
             """
             }
             ]
@@ -30,35 +46,40 @@ def ask_patient(question, conv_history: list[dict]) -> dict:
 
 INITIAL_QUESTION = "What brings you today?"
 FRONT_EXPORT_PATH = "data/investigator.pkl"
-
-def main():
-    investigator = Investigator()
-    question = INITIAL_QUESTION
-    investigator.update_conversation_history(question, role="clinician")
-    while True:
-        breakpoint()
-        print("Asking patient")
-        response = ask_patient(question, investigator.conversation_history)
-        investigator.update_conversation_history(response, role="patient")
-        symptoms_score = symptoms_func(response)
-        print("Updating patient representation")
-        investigator.update_patient_representation(symptoms_score)
-        # TODO update clinical reprot
-        # investigator.update_clinical_report()
-
-        instruction =  investigator.generate_instruction()
-        question = call_api(instruction, role="clinician")
-        investigator.update_conversation_history(question, role="clinician")
-
-        print("Investigator instruction:", instruction)
-
-        with open(FRONT_EXPORT_PATH, "wb") as stream:
-            pickle.dump(investigator, stream)
-        print(f"Exported investigator to {FRONT_EXPORT_PATH}")
-
-
-
-if __name__ == '__main__':
-    main()
-
+class DialogueManager:
+    def __init__(self):
+        self.investigator = Investigator()
+        self.question = INITIAL_QUESTION
+        self.investigator.update_conversation_history(self.question, role="clinician")
     
+    def process_interaction(self):
+        """Single turn of dialogue"""
+        response = ask_patient(self.question, self.investigator.conversation_history, self.investigator.patient_metadata)
+        self.investigator.update_conversation_history(response, role="patient")
+        
+        reformulated_response, contains_symptoms = reformulate_patient_response(response)
+        if contains_symptoms:
+            self.investigator.raw_clinical_report.append(reformulated_response)
+            self.investigator.update_clinical_report()
+
+        print("Reformulated response:", reformulated_response)
+        for symptom in reformulated_response:
+            symptoms_score = symptoms_func(symptom)
+            q = symptoms_score.score.quantile(0.99)
+            symptoms_score = symptoms_score.where(symptoms_score.score > q, 0)
+            self.investigator.update_patient_representation(symptoms_score)
+            #print(f"Symptom scores for '{symptom}':", symptoms_func(symptom).where(symptoms_func(symptom)['score']>0.5).dropna())
+            print(f"Symptom scores for '{symptom}':", symptoms_score.sort_values(by="score", ascending=False))
+        self.investigator.iteration_counter += 1 
+        
+        instruction = self.investigator.generate_instruction()
+        self.question = call_api(instruction, role="clinician")
+        self.investigator.update_conversation_history(self.question, role="clinician")
+        
+        return {
+            "response": response,
+            "next_question": self.question,
+            "diagnosis_proba": self.investigator.compute_score_distribution()
+        }
+
+# Remove the main() function as it will be controlled by Streamlit
