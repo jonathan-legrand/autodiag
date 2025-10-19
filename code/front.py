@@ -1,7 +1,7 @@
 import streamlit as st
 from main import DialogueManager
 import pandas as pd
-from page_style import start_window, show_recap, plot_diagnosis, criteria_list, colors_chat
+from page_style import start_window, show_recap, plot_diagnosis, criteria_list, colors_chat, typewriter
 
 
 
@@ -113,7 +113,11 @@ def app():
                 with st.container() : 
                     st.markdown(f':{colors_chat[element["role"]]}[**{element["role"]}**]')
                 with st.container(border = True) : 
-                    st.write(element['content'])
+                    if e >= len(investigator.conversation_history) - 2 : 
+                        speed = 5
+                        typewriter(text=element['content'], speed=speed)
+                    else :
+                        st.write(element['content'])
                 
 
 

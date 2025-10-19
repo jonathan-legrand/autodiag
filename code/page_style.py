@@ -6,6 +6,7 @@ from pathlib import Path
 
 import plotly.express as px
 
+import time
 
 criteria_list = ['Do these symptoms last longer than 2 weeks?', 'Do these symptoms have an impact on private and professional life?', 'Do these symptoms cause significant suffering?']
 
@@ -95,3 +96,12 @@ def plot_diagnosis(diagnosis_proba):
     st.plotly_chart(fig)
 
 colors_chat = {'clinician' : 'blue', 'patient' : 'red'}  # gris clair / bleu clair
+
+def typewriter(text: str, speed: int):
+    tokens = text.split()
+    container = st.empty()
+    for index in range(len(tokens) + 1):
+        curr_full_text = " ".join(tokens[:index])
+        container.markdown(curr_full_text)
+        time.sleep(1 / speed)
+
