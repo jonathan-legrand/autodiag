@@ -35,13 +35,20 @@ with open(symptoms_embeddings_path, 'rb') as fp:
 def reformulate_patient_response(rep_patient:str):
     prompt = f"""
     Extract and list the symptoms mentioned in the following patient response. 
-    Provide the symptoms as a comma-separated list.
-
+    Describe the symptoms in a few sentences, in terms related to mental health.
+    Reformulated multiple times the description of each symptoms
+    if no symptoms are mentioned, respond with 'no symptoms'.
+    Return the symptoms description as comma separated list of long descriptions.
+    do not mention anything other than these descriptions.
     Patient Response: "{rep_patient}"
-    Symptoms:
     """
     response = call_api([{"role": "user", "content": prompt}], role="patient")
-    return response
+
+    contains_symptoms = True
+    if "no symptoms" in response.lower():
+        contains_symptoms = False
+    response = response.split(",")
+    return response, contains_symptoms
 
 def distance_rep_patient(rep_patient:str, preprocess=True):
     if preprocess:
@@ -53,7 +60,7 @@ def distance_rep_patient(rep_patient:str, preprocess=True):
     distance = rep_embedding @ criteria_embedding.T
 
     # keep on
-    thr = np.max((np.percentile(distance, 99), 0.5))
+    thr = np.max((np.percentile(distance, 90), 0.7))
     distance = np.where(distance >= thr, distance, 0)
 
     patient_frame = symptoms_embeds[['symptome']].copy()

@@ -22,7 +22,6 @@ class Investigator:
         self.patient_metadata = {
 
         }
-
         
 
 
@@ -50,6 +49,8 @@ class Investigator:
         self.conversation_history = []
         self.conversation_summary = []
         self.system_conversation_history = []
+        self.clinical_report = []
+
 
 
     @property
@@ -65,7 +66,6 @@ class Investigator:
 
     def update_patient_representation(self, new_scores):
         self.long_scores["score"] += new_scores["score"]
-        self.iteration_counter += 1
 
         # first proxy: n cycles
         if self.iteration_counter > self.n_switch_cycles:
